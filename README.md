@@ -1,6 +1,6 @@
 # Campus Loop MVP
 
-NTU·NTNU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 웹 MVP입니다.
+NTU·NCCU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 웹 MVP입니다.
 
 **Live:** [campus-loop-mvp.pages.dev](https://campus-loop-mvp.pages.dev)
 
@@ -30,7 +30,7 @@ npm run deploy
 
 ## 구현 범위
 
-- NTU·NTNU 및 교내/교외 숙소 선택
+- NTU·NCCU 및 교내/교외 숙소 선택
 - 생활키트 구성과 Return Credit 가격 안내
 - 새 침구·수건·제습용품 추가
 - 캠퍼스별 수령일·시간 선택

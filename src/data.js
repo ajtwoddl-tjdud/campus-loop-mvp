@@ -3,8 +3,8 @@ export const campuses = {
     pickup: 'NTU Main Gate Welcome Point',
     dates: ['Aug 31', 'Sep 1', 'Sep 2'],
   },
-  NTNU: {
-    pickup: 'NTNU Heping Campus Gate 1',
+  NCCU: {
+    pickup: 'NCCU Main Gate Welcome Point',
     dates: ['Sep 2', 'Sep 3', 'Sep 4'],
   },
 }
