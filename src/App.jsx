@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, BedDouble, CalendarDays, Check, ChevronDown, CircleCheck,
-  Clock3, Droplets, Home, Layers3, MapPin, PackageCheck, RotateCcw,
-  School, Sparkles, Utensils, Wind, X,
+  Droplets, Home, Layers3, MapPin, PackageCheck, PackageOpen,
+  PanelTop, RotateCcw, School, Shirt, Sparkles, SprayCan, Utensils, Wind, X,
 } from 'lucide-react'
-import { addons, baseItems, campuses, money } from './data.js'
+import {
+  bundles, campuses, localized, money, purchaseProducts, rentalProducts, stayOptions,
+} from './data.js'
 import { copy } from './i18n.js'
 
-const STORAGE_KEY = 'campus-loop-reservation'
+const STORAGE_KEY = 'campus-loop-reservation-v2'
 const languages = ['en', 'ko', 'zh']
-const itemIcons = [Wind, Sparkles, PackageCheck, Home, Utensils, RotateCcw]
-const addonIcons = { BedDouble, Layers3, Droplets }
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const rentalIcons = { Wind, Shirt, PackageOpen, PanelTop, Utensils, SprayCan }
+const purchaseIcons = { BedDouble, Layers3, Droplets }
 
 function Logo() {
   return <a href="#top" className="logo" aria-label="Campus Loop home"><span className="loop-mark"><span /></span>Campus Loop</a>
@@ -22,7 +25,7 @@ function Header({ t, onLanguage, onReservation }) {
       <Logo />
       <nav aria-label="Primary navigation">
         <a href="#how">{t.how}</a>
-        <a href="#inside">{t.inside}</a>
+        <a href="#builder">{t.inside}</a>
       </nav>
       <div className="header-actions">
         <button className="language" onClick={onLanguage} aria-label="Change language">{t.lang}<ChevronDown size={15} /></button>
@@ -32,133 +35,300 @@ function Header({ t, onLanguage, onReservation }) {
   )
 }
 
-function Steps({ step, t }) {
+function Progress({ step, labels }) {
   return (
     <div className="steps" aria-label="Reservation progress">
-      {[t.campus, t.kit, t.pickup].map((label, index) => {
-        const n = index + 1
-        return <div className={`step ${n === step ? 'active' : ''} ${n < step ? 'done' : ''}`} key={label}><span>{n < step ? <Check size={14} /> : n}</span>{label}</div>
+      {labels.map((label, index) => {
+        const number = index + 1
+        return (
+          <div className={`step ${number === step ? 'active' : ''} ${number < step ? 'done' : ''}`} key={label}>
+            <span>{number < step ? <Check size={14} /> : number}</span>
+            <b>{label}</b>
+          </div>
+        )
       })}
     </div>
   )
 }
 
-function Choice({ selected, onClick, icon: Icon, children, testId }) {
+function Choice({ selected, onClick, icon: Icon, title, body, testId }) {
   return (
     <button type="button" className={`choice ${selected ? 'selected' : ''}`} onClick={onClick} data-testid={testId}>
-      <Icon size={23} strokeWidth={1.6} /><span>{children}</span><span className="choice-check">{selected && <Check size={14} />}</span>
+      {Icon ? <Icon size={23} strokeWidth={1.6} /> : null}
+      <span><strong>{title}</strong>{body ? <small>{body}</small> : null}</span>
+      <span className="choice-check">{selected ? <Check size={14} /> : null}</span>
     </button>
   )
 }
 
-function PriceSummary({ t, selectedAddons = [], compact = false }) {
-  const addOnTotal = addons.filter((item) => selectedAddons.includes(item.id)).reduce((sum, item) => sum + item.price, 0)
+function PanelHeader({ title, body }) {
+  return <div className="panel-title"><h2>{title}</h2>{body ? <p>{body}</p> : null}</div>
+}
+
+function OrderSummary({ rentalIds, purchaseIds, language, t }) {
+  const rentalTotal = rentalProducts.reduce((sum, item) => rentalIds.includes(item.id) ? sum + item.price : sum, 0)
+  const purchaseTotal = purchaseProducts.reduce((sum, item) => purchaseIds.includes(item.id) ? sum + item.price : sum, 0)
   return (
-    <div className={`price-summary ${compact ? 'compact' : ''}`} aria-label="Order summary">
-      <div><span>{t.reusable}</span><strong>{money(2000)}</strong></div>
-      {compact && <div><span>{t.addOns}</span><strong>{money(addOnTotal)}</strong></div>}
-      {compact && <div className="total"><span>{t.due}</span><strong>{money(2000 + addOnTotal)}</strong></div>}
-      <div className="credit"><span>{compact ? t.credit : t.goodReturn}</span><strong>− {money(600)}</strong></div>
-      {!compact && <div className="total"><span>{t.yourCost}</span><strong>{money(1400)}</strong></div>}
+    <div className="order-summary" aria-label={t.order}>
+      <h3>{t.order}</h3>
+      <div><span>{t.rentalSubtotal}</span><strong>{money(rentalTotal)}</strong></div>
+      <div><span>{t.buySubtotal}</span><strong>{money(purchaseTotal)}</strong></div>
+      <div className="order-total"><span>{t.total}</span><strong>{money(rentalTotal + purchaseTotal)}</strong></div>
+      <p><PackageCheck size={19} /> {rentalIds.length} {t.selectedItems}</p>
+      {rentalIds.length > 0 ? (
+        <ul>
+          {rentalProducts.filter((item) => rentalIds.includes(item.id)).map((item) => <li key={item.id}>{localized(item.name, language)}</li>)}
+        </ul>
+      ) : null}
     </div>
   )
 }
 
-function CampusStep({ campus, setCampus, housing, setHousing, t, next }) {
+function Actions({ back, next, nextLabel, backLabel, disabled = false }) {
   return (
-    <div className="step-grid campus-grid">
-      <section className="selection-column">
-        <h3>{t.selectCampus}</h3>
-        <div className="choice-grid">
-          {Object.keys(campuses).map((name) => <Choice key={name} selected={campus === name} onClick={() => setCampus(name)} icon={School} testId={`campus-${name}`}>{name}</Choice>)}
-        </div>
-        <h3>{t.selectHousing}</h3>
-        <div className="choice-grid">
-          <Choice selected={housing === 'dorm'} onClick={() => setHousing('dorm')} icon={School} testId="housing-dorm">{t.dorm}</Choice>
-          <Choice selected={housing === 'off'} onClick={() => setHousing('off')} icon={Home} testId="housing-off">{t.off}</Choice>
-        </div>
-        <p className="selected-line"><CircleCheck size={18} /> {t.selected}: <strong>{campus} / {housing === 'dorm' ? t.dorm : t.off}</strong></p>
-      </section>
-      <section className="kit-list" id="inside">
-        <h3>{t.includes}</h3>
-        <ul>{baseItems.map((item, i) => { const Icon = itemIcons[i]; return <li key={item}><Icon size={18} /><span>{item}</span></li> })}</ul>
-        <p>{t.adjusted}</p>
-      </section>
-      <section className="summary-column">
-        <PriceSummary t={t} />
-        <button className="button button-primary button-wide" onClick={next}>{t.continue}</button>
-      </section>
+    <div className="panel-actions">
+      {back ? <button className="button button-outline" onClick={back}><ArrowLeft size={17} />{backLabel}</button> : <span />}
+      <button className="button button-primary" onClick={next} disabled={disabled}>{nextLabel}</button>
     </div>
   )
 }
 
-function KitStep({ selectedAddons, toggleAddon, t, back, next }) {
+function StayStep({ profile, setProfile, storage, setStorage, t, language, next, onStayType }) {
+  const [errors, setErrors] = useState({})
+  const today = new Date().toISOString().slice(0, 10)
+  const update = (key, value) => setProfile((current) => ({ ...current, [key]: value }))
+  const validate = () => {
+    const nextErrors = {}
+    if (profile.startDate < today) nextErrors.startDate = t.pastDate
+    if (profile.endDate <= profile.startDate) nextErrors.endDate = t.dateError
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length === 0) next()
+  }
+
   return (
-    <div className="step-grid detail-grid">
-      <section className="addons-column">
-        <h2>{t.make}</h2><p className="section-copy">{t.makeBody}</p>
-        <div className="addon-list">
-          {addons.map((item) => { const Icon = addonIcons[item.icon]; const selected = selectedAddons.includes(item.id); return (
-            <button type="button" key={item.id} className={`addon-row ${selected ? 'selected' : ''}`} onClick={() => toggleAddon(item.id)} data-testid={`addon-${item.id}`}>
-              <span className="box">{selected && <Check size={15} />}</span><Icon size={28} strokeWidth={1.5} /><strong>{item.name}</strong><span>{money(item.price)}</span>
-            </button>
-          )})}
+    <div className="builder-content stay-layout">
+      <section className="main-panel">
+        <PanelHeader title={t.stayTitle} body={t.stayBody} />
+        <div className="stay-fields">
+          <fieldset>
+            <legend>{t.campus}</legend>
+            <div className="choice-grid two">
+              {Object.keys(campuses).map((campus) => <Choice key={campus} selected={profile.campus === campus} onClick={() => update('campus', campus)} icon={School} title={campus} testId={`campus-${campus}`} />)}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>{t.housing}</legend>
+            <div className="choice-grid two">
+              <Choice selected={profile.housing === 'dorm'} onClick={() => update('housing', 'dorm')} icon={School} title={t.dorm} testId="housing-dorm" />
+              <Choice selected={profile.housing === 'off'} onClick={() => update('housing', 'off')} icon={Home} title={t.off} testId="housing-off" />
+            </div>
+          </fieldset>
+          <fieldset className="duration-fieldset">
+            <legend>{t.duration}</legend>
+            <div className="choice-grid three">
+              {stayOptions.map((option) => (
+                <Choice
+                  key={option.id}
+                  selected={profile.stayType === option.id}
+                  onClick={() => onStayType(option.id)}
+                  title={localized(option.name, language)}
+                  body={localized(option.description, language)}
+                  testId={`stay-${option.id}`}
+                />
+              ))}
+            </div>
+          </fieldset>
+          <div className="date-grid">
+            <label>{t.start}<input type="date" min={today} value={profile.startDate} onChange={(event) => update('startDate', event.target.value)} aria-invalid={Boolean(errors.startDate)} />{errors.startDate ? <span className="error">{errors.startDate}</span> : null}</label>
+            <label>{t.end}<input type="date" min={profile.startDate || today} value={profile.endDate} onChange={(event) => update('endDate', event.target.value)} aria-invalid={Boolean(errors.endDate)} />{errors.endDate ? <span className="error">{errors.endDate}</span> : null}</label>
+          </div>
+          <div className="school-rule"><CircleCheck size={19} /><span><strong>{t.schoolNote}</strong>{localized(campuses[profile.campus].rule, language)}</span></div>
+          {profile.stayType === 'long' ? (
+            <div className="storage-box">
+              <h3>{t.storageTitle}</h3><p>{t.storageBody}</p>
+              <div className="choice-grid two compact">
+                <Choice selected={storage.interested} onClick={() => setStorage((current) => ({ ...current, interested: true }))} title={t.storageYes} />
+                <Choice selected={!storage.interested} onClick={() => setStorage((current) => ({ ...current, interested: false }))} title={t.storageNo} />
+              </div>
+              {storage.interested ? (
+                <div className="storage-fields">
+                  <label>{t.storageStart}<input type="date" value={storage.startDate} onChange={(event) => setStorage((current) => ({ ...current, startDate: event.target.value }))} /></label>
+                  <label>{t.storageEnd}<input type="date" value={storage.endDate} onChange={(event) => setStorage((current) => ({ ...current, endDate: event.target.value }))} /></label>
+                  <label>{t.boxes}<input type="number" min="1" max="20" value={storage.boxes} onChange={(event) => setStorage((current) => ({ ...current, boxes: Number(event.target.value) }))} /></label>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
+        <Actions next={validate} nextLabel={t.continueRental} backLabel={t.back} />
       </section>
-      <aside className="order-column">
-        <h3>Order summary</h3><PriceSummary t={t} selectedAddons={selectedAddons} compact />
-        <div className="button-pair"><button className="button button-outline" onClick={back}><ArrowLeft size={17} />{t.back}</button><button className="button button-primary" onClick={next}>{t.choosePickup}</button></div>
+      <aside className="context-panel">
+        <CalendarDays size={26} />
+        <h3>{localized(stayOptions.find((option) => option.id === profile.stayType).name, language)}</h3>
+        <p>{localized(stayOptions.find((option) => option.id === profile.stayType).description, language)}</p>
+        <dl><div><dt>{t.campus}</dt><dd>{profile.campus}</dd></div><div><dt>{t.housing}</dt><dd>{profile.housing === 'dorm' ? t.dorm : t.off}</dd></div></dl>
       </aside>
     </div>
   )
 }
 
-function PickupStep({ campus, form, setForm, selectedAddons, t, back, submit }) {
-  const [errors, setErrors] = useState({})
-  const details = campuses[campus]
-  const validate = () => {
-    const next = {}
-    if (!form.date) next.date = t.required
-    if (!form.time) next.time = t.required
-    if (!form.name.trim()) next.name = t.required
-    if (!form.email.trim()) next.email = t.required
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = t.emailError
-    if (!form.agree) next.agree = t.required
-    setErrors(next)
-    if (Object.keys(next).length === 0) submit()
+function RentalStep({ rentalIds, setRentalIds, bundle, setBundle, language, t, back, next }) {
+  const [error, setError] = useState('')
+  const applyBundle = (id) => {
+    setBundle(id)
+    setRentalIds(bundles[id])
+    setError('')
   }
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
+  const toggle = (id) => {
+    setBundle('custom')
+    setRentalIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+    setError('')
+  }
+  const proceed = () => rentalIds.length ? next() : setError(t.noRental)
+
   return (
-    <div className="pickup-layout">
-      <section className="pickup-main">
-        <h2>{t.choose}</h2>
-        <div className="pickup-form-grid">
-          <div>
-            <label>{t.location}</label><div className="static-input"><MapPin size={17} />{details.pickup}</div>
-            <fieldset><legend>{t.date}</legend><div className="option-row">{details.dates.map((date) => <button type="button" className={form.date === date ? 'selected' : ''} onClick={() => update('date', date)} key={date}>{date}</button>)}</div>{errors.date && <p className="error">{errors.date}</p>}</fieldset>
-            <fieldset><legend>{t.time}</legend><div className="option-row">{['10:00–12:00', '14:00–16:00'].map((time) => <button type="button" className={form.time === time ? 'selected' : ''} onClick={() => update('time', time)} key={time}>{time}</button>)}</div>{errors.time && <p className="error">{errors.time}</p>}</fieldset>
-          </div>
-          <div className="contact-fields">
-            {['name', 'email', 'line'].map((key) => <label key={key}>{t[key]}<input name={key} data-testid={`field-${key}`} value={form[key]} onChange={(e) => update(key, e.target.value)} type={key === 'email' ? 'email' : 'text'} aria-invalid={Boolean(errors[key])} />{errors[key] && <span className="error">{errors[key]}</span>}</label>)}
-            <label className="consent"><input name="agree" data-testid="field-agree" type="checkbox" checked={form.agree} onChange={(e) => update('agree', e.target.checked)} /><span>{t.agree}</span></label>{errors.agree && <span className="error">{errors.agree}</span>}
-          </div>
+    <div className="builder-content product-layout">
+      <section className="main-panel">
+        <PanelHeader title={t.chooseTitle} body={t.chooseBody} />
+        <p className="field-label">{t.recommended}</p>
+        <div className="recommendations">
+          <Choice selected={bundle === 'lite'} onClick={() => applyBundle('lite')} title={t.lite} body={t.liteBody} testId="bundle-lite" />
+          <Choice selected={bundle === 'core'} onClick={() => applyBundle('core')} title={t.core} body={t.coreBody} testId="bundle-core" />
         </div>
-        <div className="pickup-actions"><button className="button button-outline" onClick={back}><ArrowLeft size={17} />{t.back}</button><button className="button button-primary" onClick={validate}>{t.confirm}</button></div>
+        <div className="rental-list" id="rental-items">
+          {rentalProducts.map((item) => {
+            const Icon = rentalIcons[item.icon]
+            const selected = rentalIds.includes(item.id)
+            return (
+              <button type="button" className={`product-row ${selected ? 'selected' : ''}`} onClick={() => toggle(item.id)} key={item.id} data-testid={`rental-${item.id}`}>
+                <span className="box">{selected ? <Check size={15} /> : null}</span>
+                <Icon size={27} strokeWidth={1.5} />
+                <strong>{localized(item.name, language)}</strong>
+                <small>{t.returnRequired}</small>
+                <b>{money(item.price)}</b>
+              </button>
+            )
+          })}
+        </div>
+        {error ? <p className="error product-error">{error}</p> : null}
       </section>
-      <aside className="pickup-summary"><h3>Order summary</h3><PriceSummary t={t} selectedAddons={selectedAddons} compact /></aside>
+      <aside className="summary-panel">
+        <OrderSummary rentalIds={rentalIds} purchaseIds={[]} language={language} t={t} />
+        <Actions back={back} next={proceed} nextLabel={t.continueBuy} backLabel={t.back} />
+      </aside>
     </div>
   )
 }
 
-function Success({ reservation, t, onReset, onClose }) {
+function BuyStep({ rentalIds, purchaseIds, setPurchaseIds, language, t, back, next }) {
+  const toggle = (id) => setPurchaseIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  return (
+    <div className="builder-content product-layout">
+      <section className="main-panel">
+        <PanelHeader title={t.buyTitle} body={t.buyBody} />
+        <div className="purchase-grid">
+          {purchaseProducts.map((item) => {
+            const Icon = purchaseIcons[item.icon]
+            const selected = purchaseIds.includes(item.id)
+            return (
+              <button type="button" className={`purchase-card ${selected ? 'selected' : ''}`} onClick={() => toggle(item.id)} key={item.id} data-testid={`purchase-${item.id}`}>
+                <span className="box">{selected ? <Check size={15} /> : null}</span>
+                <Icon size={32} strokeWidth={1.45} />
+                <strong>{localized(item.name, language)}</strong>
+                <small>{localized(item.description, language)}</small>
+                <b>{money(item.price)}</b>
+              </button>
+            )
+          })}
+        </div>
+        <p className="quiet-note"><Sparkles size={17} />{t.skipAllowed}</p>
+      </section>
+      <aside className="summary-panel">
+        <OrderSummary rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} />
+        <Actions back={back} next={next} nextLabel={t.continuePickup} backLabel={t.back} />
+      </aside>
+    </div>
+  )
+}
+
+function PickupStep({ profile, pickup, setPickup, rentalIds, purchaseIds, language, t, back, next }) {
+  const campus = campuses[profile.campus]
+  return (
+    <div className="builder-content product-layout">
+      <section className="main-panel">
+        <PanelHeader title={t.pickupTitle} body={t.pickupBody} />
+        <div className="logistics-grid">
+          <div>
+            <label className="field-label">{t.pickupLocation}</label>
+            <div className="static-input"><MapPin size={18} />{campus.pickup}</div>
+            <fieldset><legend>{t.pickupDate}</legend><div className="option-row">{campus.dates.map((date) => <button type="button" className={pickup.date === date ? 'selected' : ''} onClick={() => setPickup((current) => ({ ...current, date }))} key={date}>{date.slice(5).replace('-', '/')}</button>)}</div></fieldset>
+            <fieldset><legend>{t.pickupTime}</legend><div className="option-row two">{['10:00–12:00', '14:00–16:00'].map((time) => <button type="button" className={pickup.time === time ? 'selected' : ''} onClick={() => setPickup((current) => ({ ...current, time }))} key={time}>{time}</button>)}</div></fieldset>
+          </div>
+          <div className="return-card">
+            <RotateCcw size={25} />
+            <h3>{t.returnLocation}</h3><p>{campus.returnPoint}</p>
+            <h3>{t.plannedReturn}</h3><p>{profile.endDate}</p>
+            <div className="operator-note">{t.operatorNote}</div>
+          </div>
+        </div>
+      </section>
+      <aside className="summary-panel">
+        <OrderSummary rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} />
+        <Actions back={back} next={next} nextLabel={t.continueContact} backLabel={t.back} />
+      </aside>
+    </div>
+  )
+}
+
+function ContactStep({ contact, setContact, rentalIds, purchaseIds, language, t, back, submit }) {
+  const [errors, setErrors] = useState({})
+  const update = (key, value) => setContact((current) => ({ ...current, [key]: value }))
+  const validate = () => {
+    const nextErrors = {}
+    if (!contact.name.trim()) nextErrors.name = t.required
+    if (!contact.email.trim()) nextErrors.email = t.required
+    else if (!EMAIL_PATTERN.test(contact.email)) nextErrors.email = t.emailError
+    if (!contact.agree) nextErrors.agree = t.required
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length === 0) submit()
+  }
+  return (
+    <div className="builder-content product-layout">
+      <section className="main-panel">
+        <PanelHeader title={t.contactTitle} body={t.contactBody} />
+        <div className="contact-form">
+          {['name', 'email', 'line'].map((key) => (
+            <label key={key}>{t[key]}
+              <input type={key === 'email' ? 'email' : 'text'} value={contact[key]} onChange={(event) => update(key, event.target.value)} aria-invalid={Boolean(errors[key])} data-testid={`field-${key}`} />
+              {errors[key] ? <span className="error">{errors[key]}</span> : null}
+            </label>
+          ))}
+          <label className="consent"><input type="checkbox" checked={contact.agree} onChange={(event) => update('agree', event.target.checked)} data-testid="field-agree" /><span>{t.agree}</span></label>
+          {errors.agree ? <span className="error">{errors.agree}</span> : null}
+        </div>
+      </section>
+      <aside className="summary-panel">
+        <OrderSummary rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} />
+        <Actions back={back} next={validate} nextLabel={t.confirm} backLabel={t.back} />
+      </aside>
+    </div>
+  )
+}
+
+function Success({ reservation, language, t, onReset, onClose }) {
+  const rentalNames = rentalProducts.filter((item) => reservation.rentalIds.includes(item.id)).map((item) => localized(item.name, language)).join(', ')
+  const purchaseNames = purchaseProducts.filter((item) => reservation.purchaseIds.includes(item.id)).map((item) => localized(item.name, language)).join(', ')
   return (
     <section className="success-panel" aria-live="polite">
-      {onClose && <button className="close-button" onClick={onClose} aria-label="Close"><X size={20} /></button>}
+      {onClose ? <button className="close-button" onClick={onClose} aria-label="Close"><X size={20} /></button> : null}
       <span className="success-icon"><Check size={30} /></span><h2>{t.success}</h2>
       <div className="success-details">
-        <p><PackageCheck size={19} />Reservation {reservation.id}</p>
-        <p><CalendarDays size={19} />{t.pickupLabel} {reservation.date} · {reservation.time}</p>
-        <p><MapPin size={19} />{campuses[reservation.campus].pickup}</p>
+        <p><PackageCheck size={19} /><span><strong>{t.reservationLabel}</strong>{reservation.id}</span></p>
+        <p><CalendarDays size={19} /><span><strong>{t.pickupLabel}</strong>{reservation.pickup.date} · {reservation.pickup.time}</span></p>
+        <p><RotateCcw size={19} /><span><strong>{t.returnLabel}</strong>{reservation.profile.endDate} · {campuses[reservation.profile.campus].returnPoint}</span></p>
+        <p><PackageOpen size={19} /><span><strong>{t.rentalLabel}</strong>{rentalNames}</span></p>
+        {purchaseNames ? <p><Sparkles size={19} /><span><strong>{t.purchaseLabel}</strong>{purchaseNames}</span></p> : null}
+        {reservation.storage.interested ? <p><Home size={19} /><span><strong>{t.storagePending}</strong>{reservation.storage.boxes} boxes</span></p> : null}
       </div>
       <p className="payment-note">{t.payment}</p>
       <button className="button button-outline" onClick={onReset}>{t.newReservation}</button>
@@ -167,56 +337,120 @@ function Success({ reservation, t, onReset, onClose }) {
 }
 
 function App() {
-  const [lang, setLang] = useState('en')
+  const [language, setLanguage] = useState('en')
   const [step, setStep] = useState(1)
-  const [campus, setCampus] = useState('NTU')
-  const [housing, setHousing] = useState('dorm')
-  const [selectedAddons, setSelectedAddons] = useState([])
-  const [form, setForm] = useState({ date: 'Sep 1', time: '10:00–12:00', name: '', email: '', line: '', agree: false })
+  const [profile, setProfile] = useState({ campus: 'NTU', housing: 'dorm', stayType: 'semester', startDate: '2026-09-01', endDate: '2027-01-15' })
+  const [storage, setStorage] = useState({ interested: false, startDate: '2027-01-16', endDate: '2027-02-15', boxes: 2 })
+  const [bundle, setBundle] = useState('core')
+  const [rentalIds, setRentalIds] = useState(bundles.core)
+  const [purchaseIds, setPurchaseIds] = useState([])
+  const [pickup, setPickup] = useState({ date: campuses.NTU.dates[1], time: '10:00–12:00' })
+  const [contact, setContact] = useState({ name: '', email: '', line: '', agree: false })
   const [reservation, setReservation] = useState(null)
   const [showReservation, setShowReservation] = useState(false)
   const builderRef = useRef(null)
-  const t = copy[lang]
+  const t = copy[language]
 
-  useEffect(() => { try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) setReservation(JSON.parse(saved)) } catch { /* storage may be unavailable */ } }, [])
-  useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang }, [lang])
-  const pickupDates = useMemo(() => campuses[campus].dates, [campus])
-  useEffect(() => { if (!pickupDates.includes(form.date)) setForm((current) => ({ ...current, date: pickupDates[1] })) }, [pickupDates, form.date])
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) setReservation(JSON.parse(saved))
+    } catch {
+      // The confirmation flow still works when storage is unavailable.
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = language === 'zh' ? 'zh-Hant' : language
+  }, [language])
+
+  useEffect(() => {
+    if (!campuses[profile.campus].dates.includes(pickup.date)) {
+      setPickup((current) => ({ ...current, date: campuses[profile.campus].dates[1] }))
+    }
+  }, [pickup.date, profile.campus])
+
+  const totals = useMemo(() => ({
+    rental: rentalProducts.reduce((sum, item) => rentalIds.includes(item.id) ? sum + item.price : sum, 0),
+    purchase: purchaseProducts.reduce((sum, item) => purchaseIds.includes(item.id) ? sum + item.price : sum, 0),
+  }), [purchaseIds, rentalIds])
 
   const scrollToBuilder = () => builderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  const go = (number) => { setStep(number); requestAnimationFrame(scrollToBuilder) }
-  const toggleAddon = (id) => setSelectedAddons((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
-  const submit = () => {
-    const saved = { id: `CL-${new Date().getFullYear().toString().slice(-2)}${String(Math.floor(10000 + Math.random() * 90000))}`, campus, housing, addons: selectedAddons, ...form }
-    setReservation(saved); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)) } catch { /* confirmation still works */ }
-    setStep(4); window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'reservation_submitted', campus } })); requestAnimationFrame(scrollToBuilder)
+  const go = (nextStep) => {
+    setStep(nextStep)
+    requestAnimationFrame(scrollToBuilder)
   }
-  const reset = () => { setStep(1); setSelectedAddons([]); setForm({ date: campuses[campus].dates[1], time: '10:00–12:00', name: '', email: '', line: '', agree: false }); setShowReservation(false); requestAnimationFrame(scrollToBuilder) }
-  const cycleLanguage = () => setLang(languages[(languages.indexOf(lang) + 1) % languages.length])
+  const selectStayType = (stayType) => {
+    const recommendation = stayOptions.find((option) => option.id === stayType).recommendation
+    setProfile((current) => ({ ...current, stayType }))
+    if (recommendation === 'lite' || recommendation === 'core') {
+      setBundle(recommendation)
+      setRentalIds(bundles[recommendation])
+    } else {
+      setBundle('custom')
+      setRentalIds(['hangers', 'baskets', 'mirror'])
+    }
+    window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'stay_type_selected', stayType } }))
+  }
+  const submit = () => {
+    const saved = {
+      id: `CL-${new Date().getFullYear().toString().slice(-2)}${String(Math.floor(10000 + Math.random() * 90000))}`,
+      version: 2,
+      profile,
+      storage,
+      rentalIds,
+      purchaseIds,
+      pickup,
+      contact: { ...contact, agree: true },
+      totals,
+      createdAt: new Date().toISOString(),
+    }
+    setReservation(saved)
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    } catch {
+      // The visible confirmation remains available.
+    }
+    setStep(6)
+    window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'reservation_submitted', school: profile.campus, stayType: profile.stayType, total: totals.rental + totals.purchase } }))
+    requestAnimationFrame(scrollToBuilder)
+  }
+  const reset = () => {
+    setStep(1)
+    setShowReservation(false)
+    setContact({ name: '', email: '', line: '', agree: false })
+    requestAnimationFrame(scrollToBuilder)
+  }
+  const cycleLanguage = () => setLanguage(languages[(languages.indexOf(language) + 1) % languages.length])
 
   return (
     <div id="top">
       <Header t={t} onLanguage={cycleLanguage} onReservation={() => reservation ? setShowReservation(true) : scrollToBuilder()} />
       <main>
         <section className="hero">
-          <div className="hero-copy"><h1>{t.hero.split('\n').map((line) => <span key={line}>{line}</span>)}</h1><p>{t.heroBody}</p><div className="hero-actions"><button className="button button-primary" onClick={scrollToBuilder}>{t.build}</button><a href="#inside">{t.see}</a></div></div>
-          <div className="hero-visual"><span className="route-line" aria-hidden="true" /><img src="/assets/dorm-essentials.png" alt="Semester kit with drying rack, storage baskets, hangers, mirror, dining set, and cleaning kit" /></div>
+          <div className="hero-copy"><h1>{t.hero.split('\n').map((line) => <span key={line}>{line}</span>)}</h1><p>{t.heroBody}</p><div className="hero-actions"><button className="button button-primary" onClick={scrollToBuilder}>{t.build}</button><a href="#builder">{t.see}</a></div></div>
+          <div className="hero-visual"><span className="route-line" aria-hidden="true" /><img src="/assets/dorm-essentials.png" alt="Reusable dorm essentials available through Campus Loop" /></div>
         </section>
 
-        <section className="builder" ref={builderRef} aria-labelledby="builder-title">
-          {step < 4 && <div className="builder-head"><h2 id="builder-title">{t.builder}</h2><Steps step={step} t={t} /></div>}
-          {step === 1 && <CampusStep campus={campus} setCampus={setCampus} housing={housing} setHousing={setHousing} t={t} next={() => go(2)} />}
-          {step === 2 && <KitStep selectedAddons={selectedAddons} toggleAddon={toggleAddon} t={t} back={() => go(1)} next={() => go(3)} />}
-          {step === 3 && <PickupStep campus={campus} form={form} setForm={setForm} selectedAddons={selectedAddons} t={t} back={() => go(2)} submit={submit} />}
-          {step === 4 && reservation && <Success reservation={reservation} t={t} onReset={reset} />}
+        <section className="builder" id="builder" ref={builderRef} aria-labelledby="builder-title">
+          {step <= 5 ? <div className="builder-head"><h2 id="builder-title">{t.builder}</h2><Progress step={step} labels={t.steps} /></div> : null}
+          {step === 1 ? <StayStep profile={profile} setProfile={setProfile} storage={storage} setStorage={setStorage} t={t} language={language} next={() => go(2)} onStayType={selectStayType} /> : null}
+          {step === 2 ? <RentalStep rentalIds={rentalIds} setRentalIds={setRentalIds} bundle={bundle} setBundle={setBundle} language={language} t={t} back={() => go(1)} next={() => go(3)} /> : null}
+          {step === 3 ? <BuyStep rentalIds={rentalIds} purchaseIds={purchaseIds} setPurchaseIds={setPurchaseIds} language={language} t={t} back={() => go(2)} next={() => go(4)} /> : null}
+          {step === 4 ? <PickupStep profile={profile} pickup={pickup} setPickup={setPickup} rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} back={() => go(3)} next={() => go(5)} /> : null}
+          {step === 5 ? <ContactStep contact={contact} setContact={setContact} rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} back={() => go(4)} submit={submit} /> : null}
+          {step === 6 && reservation ? <Success reservation={reservation} language={language} t={t} onReset={reset} /> : null}
         </section>
 
         <section className="timeline" id="how" aria-label={t.how}>
-          {t.timeline.map((label, i) => { const Icon = [PackageCheck, Clock3, RotateCcw][i]; return <div className="timeline-item" key={label}><span className="timeline-icon"><Icon size={29} strokeWidth={1.5} /></span><strong>{i + 1}</strong><p>{label}</p></div> })}
+          {t.timeline.map((label, index) => {
+            const Icon = [PackageOpen, MapPin, RotateCcw][index]
+            return <div className="timeline-item" key={label}><span className="timeline-icon"><Icon size={29} strokeWidth={1.5} /></span><strong>{index + 1}</strong><p>{label}</p></div>
+          })}
         </section>
       </main>
       <footer><Logo /><p>© 2026 Campus Loop · Taipei pilot</p></footer>
-      {showReservation && reservation && <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setShowReservation(false)}><Success reservation={reservation} t={t} onReset={reset} onClose={() => setShowReservation(false)} /></div>}
+      {showReservation && reservation ? <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setShowReservation(false)}><Success reservation={reservation} language={language} t={t} onReset={reset} onClose={() => setShowReservation(false)} /></div> : null}
     </div>
   )
 }

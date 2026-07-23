@@ -30,10 +30,11 @@ npm run deploy
 
 ## 구현 범위
 
-- NTU·NCCU 및 교내/교외 숙소 선택
-- 생활키트 구성과 Return Credit 가격 안내
-- 새 침구·수건·제습용품 추가
-- 캠퍼스별 수령일·시간 선택
+- NTU·NCCU, 숙소 유형, 체류 기간 및 대여 기간 선택
+- Lite·Core 추천 세트와 개별 대여품 커스텀 구성
+- 대여품과 새 제품을 분리한 실시간 주문 요약
+- 장기 체류 고객의 방학 중 보관 수요 확인
+- 캠퍼스 규정 안내와 수령·반납 일정 선택
 - 고객 연락처 검증 및 예약번호 생성
 - 브라우저 내 최근 예약 저장·복원
 - 영어·한국어·번체중문 전환
@@ -43,5 +44,5 @@ npm run deploy
 
 ## 문서와 디자인
 
-- 디자인 기준: `design/campus-loop-primary-concept.png`, `design/campus-loop-states-concept.png`
-- QA 렌더: `design/campus-loop-desktop-render.png`, `design/campus-loop-mobile-render.png`
+- V2 디자인 기준: `design/campus-loop-v2-desktop-concept.png`, `design/campus-loop-v2-mobile-concept.png`
+- V2 QA 렌더: `design/campus-loop-v2-desktop-render.png`, `design/campus-loop-v2-mobile-render.png`
