@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, BedDouble, CalendarDays, Check, ChevronDown, CircleCheck,
-  Droplets, Home, Layers3, MapPin, PackageCheck, PackageOpen,
-  PanelTop, RotateCcw, School, Shirt, Sparkles, SprayCan, Utensils, Wind, X,
+  ArrowLeft, ArrowRight, BedDouble, Box, CalendarDays, Check, ChevronDown,
+  CircleCheck, Droplets, Home, Layers3, Leaf, MapPin, Menu, PackageCheck,
+  PackageOpen, PanelTop, Plug, Recycle, RotateCcw, School, Shirt, Sparkles,
+  SprayCan, UserRound, Utensils, Wind, X,
 } from 'lucide-react'
 import {
   bundles, campuses, localized, money, purchaseProducts, rentalProducts, stayOptions,
@@ -14,18 +15,33 @@ const languages = ['en', 'ko', 'zh']
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const rentalIcons = { Wind, Shirt, PackageOpen, PanelTop, Utensils, SprayCan }
 const purchaseIcons = { BedDouble, Layers3, Droplets }
+const storySteps = [
+  { title: 'Reserve before arrival', body: 'Choose your stay length and the items you need, then reserve everything online.', icon: CalendarDays },
+  { title: 'Pick up', body: 'Collect your items at a designated campus hub or choose delivery when available.', icon: MapPin },
+  { title: 'Use', body: 'Use your essentials for as long as you need with short- and long-stay rental options.', icon: PackageCheck },
+  { title: 'Return', body: 'Bring everything back to the designated return point before moving out.', icon: Box },
+  { title: 'Pass it on', body: 'Returned items are carefully inspected before they support the next student.', icon: Recycle },
+]
+const storyCategories = [
+  { label: 'Hangers', icon: Shirt },
+  { label: 'Cleaning tools', icon: SprayCan },
+  { label: 'Power strip', icon: Plug },
+  { label: 'Storage', icon: Box },
+  { label: 'Dining & cookware', icon: Utensils },
+  { label: 'Bedding', icon: BedDouble, isNew: true },
+]
 
 function Logo() {
   return <a href="#top" className="logo" aria-label="Campus Loop home"><span className="loop-mark"><span /></span>Campus Loop</a>
 }
 
-function Header({ t, onLanguage, onReservation }) {
+function Header({ t, onLanguage, onReservation, onStory }) {
   return (
     <header className="site-header">
       <Logo />
       <nav aria-label="Primary navigation">
+        <button className="nav-link" onClick={onStory}>{t.storyTitle}</button>
         <a href="#how">{t.how}</a>
-        <a href="#builder">{t.inside}</a>
       </nav>
       <div className="header-actions">
         <button className="language" onClick={onLanguage} aria-label="Change language">{t.lang}<ChevronDown size={15} /></button>
@@ -336,8 +352,113 @@ function Success({ reservation, language, t, onReset, onClose }) {
   )
 }
 
+function CampusLoopStory({ onBack }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  const scrollToSection = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+  return (
+    <div className="story-page">
+      <div className="story-shell">
+        <header className="story-header">
+          <button className="story-brand" onClick={() => onBack('top')} aria-label="Back to Campus Loop rental">
+            <span className="loop-mark"><span /></span>
+            <span>CAMPUS LOOP</span>
+          </button>
+          <nav className="story-desktop-nav" aria-label="Campus Loop information">
+            <button onClick={() => scrollToSection('story-how')}>How it works</button>
+            <button className="story-rental-link" onClick={() => onBack('builder')}>Build my rental</button>
+          </nav>
+          <button className="story-menu-button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Open menu">
+            {menuOpen ? <X size={23} /> : <Menu size={23} />}
+          </button>
+          {menuOpen ? (
+            <div className="story-menu" role="menu">
+              <button role="menuitem" onClick={() => onBack('top')}>Back to main</button>
+              <button role="menuitem" onClick={() => onBack('builder')}>Build my rental</button>
+            </div>
+          ) : null}
+        </header>
+
+        <main className="story-content">
+          <section className="story-hero">
+            <span className="story-exclusive">INTERNATIONAL STUDENT EXCLUSIVE</span>
+            <h1>Arrive ready.<br />Leave light.</h1>
+            <p>Rent the everyday essentials you need after arrival, then return everything at once before moving out.</p>
+            <img src="/assets/campus-loop-about-dorm.png" alt="A tidy dorm room with bedding, a desk, and organized storage" />
+          </section>
+
+          <section className="story-how" id="story-how" aria-labelledby="story-how-title">
+            <h2 id="story-how-title">How It Works</h2>
+            <div className="story-steps">
+              {storySteps.map(({ title, body, icon: Icon }, index) => (
+                <article className="story-step" key={title}>
+                  <div className={`story-step-number ${index === storySteps.length - 1 ? 'final' : ''}`}>
+                    {index === storySteps.length - 1 ? <Recycle size={15} /> : index + 1}
+                  </div>
+                  <div>
+                    <h3><Icon size={16} />{title}</h3>
+                    <p>{body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="story-inventory" id="story-inventory" aria-labelledby="story-inventory-title">
+            <span>CATEGORY</span>
+            <h2 id="story-inventory-title">What&apos;s In The Loop</h2>
+            <div className="story-category-grid">
+              {storyCategories.map(({ label, icon: Icon, isNew }) => (
+                <article className={isNew ? 'featured' : ''} key={label}>
+                  {isNew ? <b>NEW</b> : null}
+                  <Icon size={22} strokeWidth={1.7} />
+                  <h3>{label}</h3>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <div className="story-lower-grid">
+            <section className="story-storage" id="story-storage">
+              <div className="story-storage-label"><Leaf size={15} />SPECIAL OFFER</div>
+              <h2>Storage for<br />long-stay students</h2>
+              <p>Leave heavy luggage with us during school breaks or trips home. Campus Loop keeps your move simple and light.</p>
+              <div className="story-storage-note"><span />Vacation Storage Available</div>
+            </section>
+
+            <section className="story-cta">
+              <div className="story-try-copy">
+                <span>YOUR STAY, MADE LIGHTER</span>
+                <h2>Try it for one stay.</h2>
+                <p>Pack less, settle in faster, and return everything at once when it&apos;s time to leave.</p>
+                <button onClick={() => onBack('builder')}>Build my rental <ArrowRight size={17} /></button>
+              </div>
+              <div className="story-kit-visual" aria-hidden="true">
+                <div className="story-kit-core"><PackageOpen size={66} strokeWidth={1.35} /></div>
+                <span className="story-kit-item story-kit-shirt"><Shirt size={25} /></span>
+                <span className="story-kit-item story-kit-bed"><BedDouble size={25} /></span>
+                <span className="story-kit-item story-kit-dining"><Utensils size={24} /></span>
+                <Sparkles className="story-kit-sparkle" size={23} />
+              </div>
+            </section>
+          </div>
+        </main>
+
+        <nav className="story-bottom-nav" aria-label="Campus Loop story navigation">
+          <button className="active" onClick={scrollTop}><Home size={17} /><span>Home</span></button>
+          <button onClick={() => onBack('builder')}><PackageOpen size={17} /><span>Rent</span></button>
+          <button onClick={() => onBack('how')}><Recycle size={17} /><span>Returns</span></button>
+          <button onClick={() => onBack('top')}><UserRound size={17} /><span>Profile</span></button>
+        </nav>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [language, setLanguage] = useState('en')
+  const [surface, setSurface] = useState(() => window.location.hash === '#whats-campus-loop' ? 'story' : 'mvp')
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState({ campus: 'NTU', housing: 'dorm', stayType: 'semester', startDate: '2026-09-01', endDate: '2027-01-15' })
   const [storage, setStorage] = useState({ interested: false, startDate: '2027-01-16', endDate: '2027-02-15', boxes: 2 })
@@ -363,6 +484,12 @@ function App() {
   useEffect(() => {
     document.documentElement.lang = language === 'zh' ? 'zh-Hant' : language
   }, [language])
+
+  useEffect(() => {
+    const syncSurface = () => setSurface(window.location.hash === '#whats-campus-loop' ? 'story' : 'mvp')
+    window.addEventListener('hashchange', syncSurface)
+    return () => window.removeEventListener('hashchange', syncSurface)
+  }, [])
 
   useEffect(() => {
     if (!campuses[profile.campus].dates.includes(pickup.date)) {
@@ -422,13 +549,25 @@ function App() {
     requestAnimationFrame(scrollToBuilder)
   }
   const cycleLanguage = () => setLanguage(languages[(languages.indexOf(language) + 1) % languages.length])
+  const openStory = () => {
+    setSurface('story')
+    window.location.hash = 'whats-campus-loop'
+    requestAnimationFrame(() => window.scrollTo({ top: 0 }))
+  }
+  const openMvp = (target = 'top') => {
+    setSurface('mvp')
+    window.location.hash = target
+    requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({ block: 'start' }))
+  }
+
+  if (surface === 'story') return <CampusLoopStory onBack={openMvp} />
 
   return (
     <div id="top">
-      <Header t={t} onLanguage={cycleLanguage} onReservation={() => reservation ? setShowReservation(true) : scrollToBuilder()} />
+      <Header t={t} onLanguage={cycleLanguage} onReservation={() => reservation ? setShowReservation(true) : scrollToBuilder()} onStory={openStory} />
       <main>
         <section className="hero">
-          <div className="hero-copy"><h1>{t.hero.split('\n').map((line) => <span key={line}>{line}</span>)}</h1><p>{t.heroBody}</p><div className="hero-actions"><button className="button button-primary" onClick={scrollToBuilder}>{t.build}</button><a href="#builder">{t.see}</a></div></div>
+          <div className="hero-copy"><h1>{t.hero.split('\n').map((line) => <span key={line}>{line}</span>)}</h1><p>{t.heroBody}</p><div className="hero-actions"><button className="button button-primary" onClick={scrollToBuilder}>{t.build}</button><button className="hero-text-link" onClick={openStory}>{t.storyTitle}</button></div></div>
           <div className="hero-visual"><span className="route-line" aria-hidden="true" /><img src="/assets/dorm-essentials.png" alt="Reusable dorm essentials available through Campus Loop" /></div>
         </section>
 

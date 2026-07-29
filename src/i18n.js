@@ -2,6 +2,7 @@ export const copy = {
   en: {
     lang: 'EN', how: 'How it works', inside: 'Rental items', reservation: 'My reservation',
     hero: 'Arrive ready.\nLeave light.', heroBody: 'Choose only what you need, pick it up near campus, and return it before you leave.', build: 'Build my rental', see: 'See rental items',
+    storyTitle: "What's Campus Loop",
     builder: 'Build your Campus Loop', steps: ['Stay', 'Rental items', 'Buy new', 'Pickup & return', 'Contact'],
     campus: 'Campus', housing: 'Housing', dorm: 'On-campus dorm', off: 'Off-campus',
     stayTitle: 'Tell us about your stay', stayBody: 'We’ll recommend a setup you can change at any time.', duration: 'Length of stay', start: 'Rental start', end: 'Planned return', schoolNote: 'School note',
@@ -20,6 +21,7 @@ export const copy = {
   ko: {
     lang: 'KO', how: '이용 방법', inside: '렌탈 품목', reservation: '내 예약',
     hero: '가볍게 도착하고,\n가볍게 떠나요.', heroBody: '필요한 것만 골라 캠퍼스 근처에서 받고, 떠나기 전에 한 번에 반납하세요.', build: '렌탈 구성하기', see: '렌탈 품목 보기',
+    storyTitle: "What's Campus Loop",
     builder: 'Campus Loop 구성하기', steps: ['체류', '렌탈 품목', '새 제품', '수령·반납', '연락처'],
     campus: '학교', housing: '거주 형태', dorm: '교내 기숙사', off: '교외 거주',
     stayTitle: '체류 조건을 알려주세요', stayBody: '추천 구성을 보여드리며 언제든 직접 수정할 수 있어요.', duration: '체류 기간', start: '대여 시작일', end: '반납 예정일', schoolNote: '학교 안내',
@@ -38,6 +40,7 @@ export const copy = {
   zh: {
     lang: '中文', how: '使用方式', inside: '租借品項', reservation: '我的預約',
     hero: '準備好再抵達，\n輕鬆地離開。', heroBody: '只選擇需要的物品，在校園附近領取，離開前一次歸還。', build: '建立租借組合', see: '查看租借品項',
+    storyTitle: "What's Campus Loop",
     builder: '建立 Campus Loop 組合', steps: ['停留', '租借品項', '購買新品', '領取與歸還', '聯絡資料'],
     campus: '學校', housing: '住宿', dorm: '校內宿舍', off: '校外住宿',
     stayTitle: '告訴我們你的停留方式', stayBody: '我們會提供可隨時調整的建議組合。', duration: '停留期間', start: '租借開始日', end: '預計歸還日', schoolNote: '學校提醒',

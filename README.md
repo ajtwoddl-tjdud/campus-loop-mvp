@@ -2,7 +2,7 @@
 
 NTU·NCCU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 웹 MVP입니다.
 
-**Live:** [campus-loop-mvp.pages.dev](https://campus-loop-mvp.pages.dev)
+**Live:** [campus-loop.pages.dev](https://campus-loop.pages.dev)
 
 ## 실행
 
@@ -39,6 +39,7 @@ npm run deploy
 - 브라우저 내 최근 예약 저장·복원
 - 영어·한국어·번체중문 전환
 - 모바일·데스크톱 반응형 UI
+- 기존 예약 MVP에서 진입할 수 있는 `What's Campus Loop` 서비스 소개 화면
 
 실제 결제, 서버 데이터베이스, 이메일·LINE 발송은 MVP 범위에서 제외했습니다. 예약 정보는 현재 브라우저의 `localStorage`에만 저장됩니다.
 
@@ -46,3 +47,6 @@ npm run deploy
 
 - V2 디자인 기준: `design/campus-loop-v2-desktop-concept.png`, `design/campus-loop-v2-mobile-concept.png`
 - V2 QA 렌더: `design/campus-loop-v2-desktop-render.png`, `design/campus-loop-v2-mobile-render.png`
+- Stitch 소개 화면 기준: `design/campus-loop-stitch-reference.png`
+- Stitch QA 렌더: `design/campus-loop-stitch-mobile-render.png`
+- Stitch CTA QA 렌더: `design/campus-loop-stitch-cta-desktop-render.png`, `design/campus-loop-stitch-cta-mobile-render.png`
