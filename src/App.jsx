@@ -35,7 +35,7 @@ function Logo() {
   return <a href="#top" className="logo" aria-label="Campus Loop home"><span className="loop-mark"><span /></span>Campus Loop</a>
 }
 
-function Header({ t, onLanguage, onReservation, onStory }) {
+function Header({ t, onLanguage, onStory }) {
   return (
     <header className="site-header">
       <Logo />
@@ -45,24 +45,32 @@ function Header({ t, onLanguage, onReservation, onStory }) {
       </nav>
       <div className="header-actions">
         <button className="language" onClick={onLanguage} aria-label="Change language">{t.lang}<ChevronDown size={15} /></button>
-        <button className="button button-dark button-small" onClick={onReservation}>{t.reservation}</button>
       </div>
     </header>
   )
 }
 
-function Progress({ step, labels }) {
+function Progress({ step, labels, stepLabel, savedLabel }) {
   return (
-    <div className="steps" aria-label="Reservation progress">
-      {labels.map((label, index) => {
-        const number = index + 1
-        return (
-          <div className={`step ${number === step ? 'active' : ''} ${number < step ? 'done' : ''}`} key={label}>
-            <span>{number < step ? <Check size={14} /> : number}</span>
-            <b>{label}</b>
-          </div>
-        )
-      })}
+    <div className="progress-wrap">
+      <div className="mobile-progress">
+        <div>
+          <span>{stepLabel} {step} of {labels.length} · <strong>{labels[step - 1]}</strong></span>
+          <small><CircleCheck size={14} />{savedLabel}</small>
+        </div>
+        <span className="mobile-progress-track"><i style={{ width: `${(step / labels.length) * 100}%` }} /></span>
+      </div>
+      <div className="steps" aria-label="Reservation progress">
+        {labels.map((label, index) => {
+          const number = index + 1
+          return (
+            <div className={`step ${number === step ? 'active' : ''} ${number < step ? 'done' : ''}`} key={label}>
+              <span>{number < step ? <Check size={14} /> : number}</span>
+              <b>{label}</b>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -177,6 +185,10 @@ function StayStep({ profile, setProfile, storage, setStorage, t, language, next,
           ) : null}
         </div>
         <Actions next={validate} nextLabel={t.continueRental} backLabel={t.back} />
+        <div className="mobile-stay-footer">
+          <strong>{profile.campus} · {profile.housing === 'dorm' ? t.dorm : t.off} · {localized(stayOptions.find((option) => option.id === profile.stayType).name, language)}</strong>
+          <button className="button button-primary" onClick={validate}>{t.continueRental}</button>
+        </div>
       </section>
       <aside className="context-panel">
         <CalendarDays size={26} />
@@ -331,12 +343,11 @@ function ContactStep({ contact, setContact, rentalIds, purchaseIds, language, t,
   )
 }
 
-function Success({ reservation, language, t, onReset, onClose }) {
+function Success({ reservation, language, t, onReset }) {
   const rentalNames = rentalProducts.filter((item) => reservation.rentalIds.includes(item.id)).map((item) => localized(item.name, language)).join(', ')
   const purchaseNames = purchaseProducts.filter((item) => reservation.purchaseIds.includes(item.id)).map((item) => localized(item.name, language)).join(', ')
   return (
     <section className="success-panel" aria-live="polite">
-      {onClose ? <button className="close-button" onClick={onClose} aria-label="Close"><X size={20} /></button> : null}
       <span className="success-icon"><Check size={30} /></span><h2>{t.success}</h2>
       <div className="success-details">
         <p><PackageCheck size={19} /><span><strong>{t.reservationLabel}</strong>{reservation.id}</span></p>
@@ -468,7 +479,6 @@ function App() {
   const [pickup, setPickup] = useState({ date: campuses.NTU.dates[1], time: '10:00–12:00' })
   const [contact, setContact] = useState({ name: '', email: '', line: '', agree: false })
   const [reservation, setReservation] = useState(null)
-  const [showReservation, setShowReservation] = useState(false)
   const builderRef = useRef(null)
   const t = copy[language]
 
@@ -544,7 +554,6 @@ function App() {
   }
   const reset = () => {
     setStep(1)
-    setShowReservation(false)
     setContact({ name: '', email: '', line: '', agree: false })
     requestAnimationFrame(scrollToBuilder)
   }
@@ -564,7 +573,7 @@ function App() {
 
   return (
     <div id="top">
-      <Header t={t} onLanguage={cycleLanguage} onReservation={() => reservation ? setShowReservation(true) : scrollToBuilder()} onStory={openStory} />
+      <Header t={t} onLanguage={cycleLanguage} onStory={openStory} />
       <main>
         <section className="hero">
           <div className="hero-copy"><h1>{t.hero.split('\n').map((line) => <span key={line}>{line}</span>)}</h1><p>{t.heroBody}</p><div className="hero-actions"><button className="button button-primary" onClick={scrollToBuilder}>{t.build}</button><button className="hero-text-link" onClick={openStory}>{t.storyTitle}</button></div></div>
@@ -572,7 +581,7 @@ function App() {
         </section>
 
         <section className="builder" id="builder" ref={builderRef} aria-labelledby="builder-title">
-          {step <= 5 ? <div className="builder-head"><h2 id="builder-title">{t.builder}</h2><Progress step={step} labels={t.steps} /></div> : null}
+          {step <= 5 ? <div className="builder-head"><h2 id="builder-title">{t.builder}</h2><Progress step={step} labels={t.steps} stepLabel={t.stepLabel} savedLabel={t.savedLabel} /></div> : null}
           {step === 1 ? <StayStep profile={profile} setProfile={setProfile} storage={storage} setStorage={setStorage} t={t} language={language} next={() => go(2)} onStayType={selectStayType} /> : null}
           {step === 2 ? <RentalStep rentalIds={rentalIds} setRentalIds={setRentalIds} bundle={bundle} setBundle={setBundle} language={language} t={t} back={() => go(1)} next={() => go(3)} /> : null}
           {step === 3 ? <BuyStep rentalIds={rentalIds} purchaseIds={purchaseIds} setPurchaseIds={setPurchaseIds} language={language} t={t} back={() => go(2)} next={() => go(4)} /> : null}
@@ -589,7 +598,6 @@ function App() {
         </section>
       </main>
       <footer><Logo /><p>© 2026 Campus Loop · Taipei pilot</p></footer>
-      {showReservation && reservation ? <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setShowReservation(false)}><Success reservation={reservation} language={language} t={t} onReset={reset} onClose={() => setShowReservation(false)} /></div> : null}
     </div>
   )
 }

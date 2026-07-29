@@ -9,9 +9,9 @@ export const campuses = {
       zh: '請先確認宿舍提供的物品。租借品不包含電器。',
     },
   },
-  NCCU: {
-    pickup: 'NCCU Main Gate Welcome Point',
-    returnPoint: 'NCCU Main Gate Return Point',
+  NTNU: {
+    pickup: 'NTNU Main Gate Welcome Point',
+    returnPoint: 'NTNU Main Gate Return Point',
     dates: ['2026-09-02', '2026-09-03', '2026-09-04'],
     rule: {
       en: 'Dorm rules differ by building. Cooking appliances and other electrical items are not included.',
