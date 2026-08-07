@@ -1,0 +1,422 @@
+corpus: 6770 posts, 30 themes, 1297 posts match no theme (19%)
+
+
+==============================================================================
+1. DEMAND DENSITY — where the intent is concentrated, not just loud
+==============================================================================
+Sorted by the Wilson lower bound on high-intent rate. `volume rank` is the
+order analyze_pain prints; a large gap means the headline ranking is
+measuring conversation volume rather than demand.
+
+  theme                       posts    hi    rate   bound  wt/post  volrank  shift
+  fitness_tracking               35    10  28.6%  16.3%      9.0       29    +28
+  personal_task_tracking         74    18  24.3%  16.0%      8.6       25    +23
+  meeting_notes                  39     6  15.4%   7.2%      8.7       28    +25
+  self_hosting                  151    17  11.3%   7.1%      8.1       19    +15
+  language_learning             113    13  11.5%   6.8%      7.6       23    +18
+  scheduling_dispatch           707    49   6.9%   5.3%      7.4        6      =
+  it_admin_ops                   92     9   9.8%   5.2%      9.7       22    +15
+  customer_acquisition          285    21   7.4%   4.9%      5.8       13     +5
+  content_marketing_ops         357    25   7.0%   4.8%      4.5       14     +5
+  comms_overload                395    22   5.6%   3.7%      7.1        9     -1
+  focus_executive_function      189    12   6.3%   3.7%      7.5       16     +5
+  care_coordination             108     7   6.5%   3.2%      6.0       24    +12
+  reporting_visibility          824    35   4.2%   3.1%      6.3        7     -6
+  hiring_staffing               935    36   3.9%   2.8%      7.3        3    -11
+  customer_support              356    16   4.5%   2.8%      7.6       10     -5
+  returns_logistics             465    17   3.7%   2.3%      7.2        8     -8
+  tenancy_property              152     7   4.6%   2.2%      8.5       18     +1
+  data_entry_integration        216     8   3.7%   1.9%      6.6       17     -1
+  classroom_teaching             55     3   5.5%   1.9%      7.9       27     +8
+  quoting_estimating            309    10   3.2%   1.8%      7.6       12     -8
+  bookkeeping_tax              1498    35   2.3%   1.7%      9.0        1    -20
+  pricing_of_software           174     6   3.4%   1.6%      9.3       15     -7
+  reviews_reputation            102     4   3.9%   1.5%      4.5       26     +3
+  language_translation          163     5   3.1%   1.3%      6.0       21     -3
+  getting_paid                  627    12   1.9%   1.1%      9.1        5    -20
+  inventory_supply              349     7   2.0%   1.0%      7.5       11    -15
+  compliance_licensing          765    12   1.6%   0.9%      7.9        4    -23
+  project_management            142     3   2.1%   0.7%      7.2       20     -8
+  cross_border_ops              968     7   0.7%   0.4%      8.0        2    -27
+  sizing_fit_apparel             28     0   0.0%   0.0%      6.1       30      =
+
+
+==============================================================================
+2. CRAWL BIAS — how much of each theme is an artifact of one query
+==============================================================================
+62% of the corpus came from phrase queries, and `would pay for` alone
+contributed 1,876 posts. A theme sourced mostly from one phrase is partly a
+measurement of that phrase. `sample %` is the share drawn from date-anchored
+subreddit sampling instead, which is phrase-neutral.
+
+  theme                       posts  sample%  wouldpay%  top query source
+  language_learning             113     19%       41%  would pay for (46)
+  tenancy_property              152     34%       40%  would pay for (61)
+  returns_logistics             465     31%       37%  would pay for (174)
+  quoting_estimating            309     30%       37%  would pay for (113)
+  care_coordination             108     35%       36%  would pay for (39)
+  hiring_staffing               935     30%       36%  would pay for (332)
+  it_admin_ops                   92     24%       35%  would pay for (32)
+  cross_border_ops              968     50%       33%  would pay for (323)
+  reviews_reputation            102     30%       33%  would pay for (34)
+  inventory_supply              349     29%       33%  would pay for (116)
+  sizing_fit_apparel             28     21%       32%  would pay for (9)
+  customer_support              356     25%       32%  would pay for (114)
+  scheduling_dispatch           707     25%       32%  would pay for (225)
+  language_translation          163     25%       31%  would pay for (51)
+  self_hosting                  151     22%       31%  would pay for (47)
+  personal_task_tracking         74     15%       31%  would pay for (23)
+  focus_executive_function      189     29%       31%  would pay for (58)
+  getting_paid                  627     37%       30%  would pay for (190)
+  bookkeeping_tax              1498     46%       29%  would pay for (440)
+  fitness_tracking               35     17%       29%  is there an app that (11)
+  compliance_licensing          765     42%       28%  would pay for (214)
+  pricing_of_software           174     35%       28%  would pay for (48)
+  content_marketing_ops         357     14%       26%  would pay for (92)
+  project_management            142     35%       25%  would pay for (36)
+  reporting_visibility          824     25%       23%  would pay for (186)
+  customer_acquisition          285     21%       21%  would pay for (61)
+  meeting_notes                  39     23%       21%  would pay for (8)
+  classroom_teaching             55     29%       20%  is there an app that (12)
+  comms_overload                395     23%       18%  still doing it manually (75)
+  data_entry_integration        216     22%       11%  still doing it manually (62)
+
+
+==============================================================================
+3. THEME CO-OCCURRENCE — adjacent jobs one product could cover
+==============================================================================
+Pairs firing together in >= 40 posts, ranked by lift (1.0 = independent).
+High lift means the two jobs are done by the same person in the same
+workflow, so a tool that only does one of them leaves the other stranded.
+
+   lift  joint  pair
+   3.79     57  content_marketing_ops  +  customer_acquisition
+   3.13     75  inventory_supply  +  returns_logistics
+   2.89     48  comms_overload  +  customer_acquisition
+   2.66     65  customer_support  +  returns_logistics
+   2.62     75  getting_paid  +  quoting_estimating
+   2.21     91  comms_overload  +  scheduling_dispatch
+   2.13     56  data_entry_integration  +  reporting_visibility
+   2.01     65  getting_paid  +  inventory_supply
+   2.00     73  comms_overload  +  getting_paid
+   1.91     92  comms_overload  +  reporting_visibility
+   1.84     45  content_marketing_ops  +  returns_logistics
+   1.76     41  cross_border_ops  +  language_translation
+   1.68     73  content_marketing_ops  +  reporting_visibility
+   1.68    233  bookkeeping_tax  +  getting_paid
+   1.67     58  customer_acquisition  +  reporting_visibility
+   1.63    159  hiring_staffing  +  scheduling_dispatch
+   1.58     51  quoting_estimating  +  scheduling_dispatch
+   1.50     65  customer_support  +  reporting_visibility
+
+
+==============================================================================
+4. TREND — share by half-year, query-sourced posts only
+==============================================================================
+The `sample:` rows are anchored to six fixed dates, so raw counts over time
+measure the crawl schedule, not Reddit. This uses only `query:` rows, whose
+month distribution is smooth. Even so, read it as directional: the archive
+returns a capped result set per query, which can favour recent posts.
+Shares are within-period, so they are immune to the rising total.
+
+  base counts per period: 2025H1=515, 2025H2=917, 2026H1=2092, 2026H2=663
+
+  theme                        2025H1   2025H2   2026H1   2026H2    delta
+  hiring_staffing              10.3%    16.5%    16.0%    17.0%    +6.8%
+  bookkeeping_tax              19.8%    16.8%    19.0%    23.1%    +3.3%
+  customer_acquisition          1.7%     6.0%     6.3%     4.2%    +2.5%
+  quoting_estimating            3.1%     4.7%     5.9%     5.1%    +2.0%
+  scheduling_dispatch          12.0%    11.7%    12.9%    13.7%    +1.7%
+  compliance_licensing          9.7%    10.0%    10.8%    11.0%    +1.3%
+  tenancy_property              2.7%     1.4%     2.2%     3.9%    +1.2%
+  comms_overload                4.9%     7.4%     8.3%     5.9%    +1.0%
+  classroom_teaching            0.2%     1.1%     1.0%     1.2%    +1.0%
+  reviews_reputation            1.6%     2.1%     1.3%     2.4%    +0.9%
+  reporting_visibility         14.0%    15.4%    14.8%    14.8%    +0.8%
+  customer_support              5.2%     6.1%     6.9%     6.0%    +0.8%
+  getting_paid                  8.9%    10.7%     9.1%     9.5%    +0.6%
+  it_admin_ops                  1.6%     1.7%     1.6%     2.0%    +0.4%
+  pricing_of_software           2.1%     2.9%     2.8%     2.4%    +0.3%
+  data_entry_integration        3.1%     3.8%     4.6%     3.2%    +0.1%
+  care_coordination             2.3%     1.0%     1.6%     2.3%    -0.1%
+  self_hosting                  3.3%     1.7%     3.1%     3.2%    -0.1%
+  content_marketing_ops         5.4%     8.8%     7.8%     5.3%    -0.2%
+  sizing_fit_apparel            0.6%     0.3%     0.7%     0.3%    -0.3%
+  personal_task_tracking        1.9%     2.0%     1.3%     1.2%    -0.7%
+  meeting_notes                 1.2%     0.8%     0.8%     0.2%    -1.0%
+  returns_logistics             7.0%     7.9%     8.3%     5.9%    -1.1%
+  fitness_tracking              1.6%     0.4%     0.8%     0.2%    -1.4%
+  focus_executive_function      4.7%     3.6%     2.7%     3.2%    -1.5%
+  project_management            3.3%     3.1%     1.7%     1.7%    -1.6%
+  language_learning             3.3%     3.2%     1.7%     1.5%    -1.8%
+  cross_border_ops             13.8%     7.3%    12.9%    11.8%    -2.0%
+  language_translation          3.7%     3.2%     3.0%     1.7%    -2.0%
+  inventory_supply              6.2%     7.1%     5.9%     3.9%    -2.3%
+
+  delta = share in 2026H2 minus share in 2025H1.
+
+
+==============================================================================
+5. INCUMBENTS — named tools people complain about
+==============================================================================
+A complaint aimed at a named product is a better wedge than a generic one:
+the buyer, the budget line and the switching trigger already exist.
+
+`sour%` counts frustration / cost / time_drain / manual_toil.
+`strict%` drops manual_toil, because the crawler defines that signal with
+`spreadsheet` and `excel` — so under `sour%` an Excel mention scores itself.
+Read `strict%` and, more importantly, `vs base`: every post in this corpus
+was selected for carrying a pain signal, so the corpus baseline is high and
+an absolute percentage means little on its own.
+
+  corpus baseline: strict-sour 26%, high-intent 6%
+
+  tool                mentions   sour%  strict%  vs base  intent%  top themes
+  Mailchimp                 15    73%     47%    1.76x      0%  content_marketing_ops, reporting_visibility, scheduling_dispatch
+  Klaviyo                   15    53%     47%    1.76x      0%  returns_logistics, bookkeeping_tax, content_marketing_ops
+  WooCommerce               22    50%     45%    1.72x      0%  content_marketing_ops, compliance_licensing, customer_support
+  Amazon Seller             37    43%     38%    1.43x      0%  inventory_supply, bookkeeping_tax, returns_logistics
+  Claude                   174    59%     37%    1.41x      2%  reporting_visibility, content_marketing_ops, hiring_staffing
+  Calendly                  19    84%     37%    1.39x     11%  scheduling_dispatch, comms_overload, data_entry_integration
+  Canva                     25    64%     36%    1.36x      8%  reporting_visibility, content_marketing_ops, scheduling_dispatch
+  Slack                    101    73%     35%    1.31x      6%  comms_overload, reporting_visibility, hiring_staffing
+  n8n                       24    54%     33%    1.26x      8%  self_hosting, getting_paid, data_entry_integration
+  Trello                    15    67%     33%    1.26x     13%  project_management, customer_support, comms_overload
+  WhatsApp                 107    58%     33%    1.24x      7%  comms_overload, reporting_visibility, getting_paid
+  eBay                      37    57%     32%    1.23x      5%  inventory_supply, returns_logistics, bookkeeping_tax
+  ChatGPT                  261    54%     32%    1.22x      6%  content_marketing_ops, reporting_visibility, hiring_staffing
+  Etsy                      70    43%     31%    1.19x      4%  customer_support, returns_logistics, bookkeeping_tax
+  Stripe                   138    51%     31%    1.18x      5%  bookkeeping_tax, reporting_visibility, getting_paid
+  HubSpot                   26    65%     31%    1.16x      4%  comms_overload, content_marketing_ops, hiring_staffing
+  Shopify                  259    54%     31%    1.15x      9%  content_marketing_ops, inventory_supply, reporting_visibility
+  WordPress                 33    42%     30%    1.14x      9%  reporting_visibility, content_marketing_ops, compliance_licensing
+  Zapier                    41    76%     29%    1.11x      2%  data_entry_integration, comms_overload, reporting_visibility
+  Notion                    94    71%     29%    1.09x     12%  comms_overload, reporting_visibility, scheduling_dispatch
+  Airtable                  19    74%     26%    0.99x     11%  reporting_visibility, data_entry_integration, getting_paid
+  Salesforce                23    70%     26%    0.99x      0%  reporting_visibility, comms_overload, hiring_staffing
+  Jira                      30    70%     23%    0.88x      7%  comms_overload, project_management, reporting_visibility
+  Xero                      44    45%     20%    0.77x      7%  bookkeeping_tax, getting_paid, reporting_visibility
+  SAP                       20    55%     20%    0.76x      0%  reporting_visibility, bookkeeping_tax, hiring_staffing
+  QuickBooks               169    43%     19%    0.72x      6%  bookkeeping_tax, getting_paid, reporting_visibility
+  Excel/Sheets             898    99%     19%    0.70x      4%  reporting_visibility, bookkeeping_tax, hiring_staffing
+  PayPal                    49    31%     16%    0.62x      0%  bookkeeping_tax, cross_border_ops, returns_logistics
+
+
+==============================================================================
+6. VERBATIM DEMAND — the actual ask, from high-intent posts
+==============================================================================
+Only posts carrying tool_search / explicit_wish / willingness_to_pay, ranked
+by demand weight, with the requesting clause extracted rather than a keyword
+window. This is the closest the corpus gets to a feature request list.
+
+
+  r/sales | 2025-12-21 | score=20 c=45 | -
+    Outside reps, how do you plan your routes on road days?
+    > is there an app that does this all for you
+    https://www.reddit.com/r/sales/comments/1psi5mz/outside_reps_how_do_you_plan_your_routes_on_road/
+
+  r/startups | 2025-08-27 | score=14 c=48 | -
+    What're you still doing manually that you wish was automated? (i will not promote)
+    > I wish there was a prompt-based platform for automations rather than drag and drop
+    https://www.reddit.com/r/startups/comments/1n1ndmq/whatre_you_still_doing_manually_that_you_wish_was/
+
+  r/projectmanagement | 2026-03-04 | score=8 c=32 | -
+    Any usefully tool for timeline and roadmaps?
+    > looking for a tool that would help and visualize a timeline that has 30+ actions which are presented in a week by week manner
+    https://www.reddit.com/r/projectmanagement/comments/1rkm1sd/any_usefully_tool_for_timeline_and_roadmaps/
+
+  r/SaaS | 2026-01-09 | score=2 c=5 | -
+    The "find what to build" problem - is there actually a market for this?
+    > I wish there was
+    > I would pay for
+    https://www.reddit.com/r/SaaS/comments/1q8m73z/the_find_what_to_build_problem_is_there_actually/
+
+  r/Construction | 2026-03-02 | score=0 c=3 | pricing_of_software
+    Why is there no simple multi site tracker?
+    > looking for an app to organize progress, materials, notes, photos that could sync between everyone on a crew
+    https://www.reddit.com/r/Construction/comments/1rj1hlw/why_is_there_no_simple_multi_site_tracker/
+
+  r/Depop | 2025-10-02 | score=53 c=16 | -
+    Whats going on with the amount of dropshippers??
+    > i wish there was a way to filter out these “Brand New” clothes that cost more than $35 CAD
+    https://www.reddit.com/r/Depop/comments/1nvr1hf/whats_going_on_with_the_amount_of_dropshippers/
+
+  r/msp | 2026-04-21 | score=339 c=146 | it_admin_ops
+    Microsoft should make Conditional Access available to everyone
+    > I wish there was a way to scream this louder but I wish Microsoft would just open up Conditional Access to all of the Microsoft 365 packages
+    https://www.reddit.com/r/msp/comments/1srye3a/microsoft_should_make_conditional_access/
+
+  r/solotravel | 2025-04-14 | score=359 c=146 | -
+    I wish there were more affordable, solo hostel rooms
+    > I wish there were more affordable, solo hostel rooms With male dorms being a rarity and that I'm a 44 year old man, I don't like the feeling that I look like the creepy guy wit
+    https://www.reddit.com/r/solotravel/comments/1jyw802/i_wish_there_were_more_affordable_solo_hostel/
+
+  r/Parenting | 2025-12-15 | score=30 c=22 | -
+    What little everyday moments do you wish you could catch on camera?
+    > I wish there was some tiny thing rolling around on the floor recording stuff before she notices anything
+    https://www.reddit.com/r/Parenting/comments/1pmypy1/what_little_everyday_moments_do_you_wish_you/
+
+  r/ecommerce | 2026-05-21 | score=1 c=32 | comms_overload
+    My mother sells homemade cakes on Instagram and her order tracking system is a complete mess. How do others manage this?
+    > Is there an app that works
+    https://www.reddit.com/r/ecommerce/comments/1tjql91/my_mother_sells_homemade_cakes_on_instagram_and/
+
+  r/selfhosted | 2026-05-15 | score=27 c=42 | -
+    [ Removed by moderator ]
+    > looking for a solution for my self
+    https://www.reddit.com/r/selfhosted/comments/1tdpdv5/what_is_your_knowledgebase_management_solution/
+
+  r/SideProject | 2025-11-09 | score=1 c=1 | -
+    Would you use a tool that automatically finds real user pain points and app ideas?
+    > I wish there was an app for…” or “is there a tool that…”, summarizes them, and shows trending pain points by category
+    https://www.reddit.com/r/SideProject/comments/1oswjkq/would_you_use_a_tool_that_automatically_finds/
+
+  r/sweatystartup | 2026-04-26 | score=6 c=37 | getting_paid, reporting_visibility
+    Issues with customers not paying solution?
+    > looking for an app where contractors can see which addresses have a history of non payment, verbal issues, or other problems with contractors, but I could
+    https://www.reddit.com/r/sweatystartup/comments/1swfbeg/issues_with_customers_not_paying_solution/
+
+  r/SideProject | 2026-01-10 | score=1 c=5 | data_entry_integration
+    Manual pain point research took 2 weeks. Now wondering if I should automate it
+    > I wish there was", "I would pay for", "so frustrated that
+    https://www.reddit.com/r/SideProject/comments/1q93ii2/manual_pain_point_research_took_2_weeks_now/
+
+  r/Plumbing | 2026-05-15 | score=12 c=30 | bookkeeping_tax
+    About to become commission based
+    > I would pay my own taxes now and would have no coverage if I was hurt on a job
+    https://www.reddit.com/r/Plumbing/comments/1tea9ll/about_to_become_commission_based/
+
+
+==============================================================================
+7. MARKET LIFT — themes that belong to a market vs themes everywhere
+==============================================================================
+Lift of a theme within its strongest market. A theme at lift ~1 is generic
+background pain present in every market; a high-lift theme is specific to a
+buyer you can name and target. Shown only where the cell holds >= 25 posts.
+
+   lift theme                      market                    in-cell  theme n
+  17.88 personal_task_tracking     attention_health               26       74
+  10.89 classroom_teaching         regulated_professions          39       55
+  10.83 self_hosting               engineering                   101      151
+   9.77 care_coordination          household                      82      108
+   8.45 it_admin_ops               engineering                    48       92
+   7.69 inventory_supply           logistics                      67      349
+   7.16 language_learning          cross_border                   94      113
+   7.07 tenancy_property           regulated_professions          70      152
+   4.59 cross_border_ops           cross_border                  517      968
+   4.14 returns_logistics          logistics                      48      465
+   3.94 content_marketing_ops      commerce                      104      357
+   3.89 customer_acquisition       go_to_market                   46      285
+   3.01 language_translation       cross_border                   57      163
+   2.74 project_management         back_office                    48      142
+   2.50 bookkeeping_tax            back_office                   461     1498
+   2.44 data_entry_integration     software_business              89      216
+   2.36 customer_support           commerce                       62      356
+   2.16 comms_overload             software_business             144      395
+   2.09 scheduling_dispatch        local_services                100      707
+   2.03 getting_paid               back_office                   157      627
+   1.97 focus_executive_function   household                      29      189
+   1.94 hiring_staffing            back_office                   224      935
+   1.85 quoting_estimating         smb_operations                 55      309
+   1.79 pricing_of_software        smb_operations                 30      174
+   1.78 reporting_visibility       software_business             247      824
+   1.69 reviews_reputation         software_business              29      102
+   1.52 compliance_licensing       engineering                    72      765
+
+
+==============================================================================
+8. SUPPLY-SIDE CONTAMINATION — posts pitching, not asking
+==============================================================================
+`tool_search` fires on 'alternative to X', which is as often an
+announcement as a request: 'I built a self-hosted alternative to ngrok'.
+Those posts are supply, and counting them as demand inflates exactly the
+label the ranking trusts most. Detected from the author's framing, not the
+subreddit, so it catches launches outside the four builder subs too.
+
+  Measured against the *uncorrected* labels, so the size of the correction
+  stays visible after analyze_pain started applying it.
+
+  posts with an intent label:     557
+  of those, supply-side:          163  (29%)
+  genuine demand-side:            394
+
+  121 of the 163 sit in builder subreddits, so --exclude-builders
+  alone would still leave 42 of them in the ranking.
+
+  theme                        intent   supply   clean   supply%
+  project_management                8        5       3      62%
+  customer_acquisition             49       28      21      57%
+  inventory_supply                 16        9       7      56%
+  language_translation             11        6       5      55%
+  content_marketing_ops            50       25      25      50%
+  reporting_visibility             68       33      35      49%
+  data_entry_integration           15        7       8      47%
+  self_hosting                     30       13      17      43%
+  reviews_reputation                7        3       4      43%
+  hiring_staffing                  63       27      36      43%
+  getting_paid                     21        9      12      43%
+  customer_support                 27       11      16      41%
+  pricing_of_software              10        4       6      40%
+  meeting_notes                    10        4       6      40%
+  focus_executive_function         20        8      12      40%
+  comms_overload                   34       12      22      35%
+  language_learning                20        7      13      35%
+  scheduling_dispatch              67       18      49      27%
+  compliance_licensing             16        4      12      25%
+  returns_logistics                22        5      17      23%
+  cross_border_ops                  8        1       7      12%
+  bookkeeping_tax                  39        4      35      10%
+  it_admin_ops                     10        1       9      10%
+  quoting_estimating               11        1      10       9%
+  fitness_tracking                 11        1      10       9%
+  personal_task_tracking           19        1      18       5%
+  tenancy_property                  7        0       7       0%
+  care_coordination                 7        0       7       0%
+
+
+==============================================================================
+9. RESIDUE — what still matches no theme, and why that is fine
+==============================================================================
+Driving this to zero would be a mistake. Most of the residue is career
+advice, emotional venting and lifestyle chat that the crawler swept in
+because a frustration or time_drain regex matched. Those posts have no
+product shape, and inventing themes for them would manufacture demand.
+What matters is the split between that and genuine uncovered demand.
+
+  untagged posts:                1297  (19% of corpus)
+    no signal left at all:        322  (kept by the crawler on a loose match; --drop-unsignalled removes them)
+    signal + real body:           886  (the pile worth mining)
+    still carrying intent:        143  (the only part that is a real gap)
+
+  residue by subreddit (top 15):
+    r/SideProject                   74  <- builder self-promotion
+    r/SaaS                          63  <- builder self-promotion
+    r/indiehackers                  62  <- builder self-promotion
+    r/microsaas                     62  <- builder self-promotion
+    r/Accounting                    48
+    r/povertyfinance                41
+    r/digitalnomad                  33
+    r/productivity                  33
+    r/EntrepreneurRideAlong         31  <- builder self-promotion
+    r/sysadmin                      28
+    r/startups                      28  <- builder self-promotion
+    r/personalfinance               28
+    r/devops                        25
+    r/AgingParents                  25
+    r/expats                        25
+
+  residue by market:
+    software_business              289
+    household                      144
+    local_services                 131
+    smb_operations                 124
+    engineering                     99
+    back_office                     83
+    commerce                        74
+    regulated_professions           74
+    cross_border                    64
+    fashion_apparel                 57
+    independent_work                54
+    attention_health                47
+    go_to_market                    43
+    logistics                       14

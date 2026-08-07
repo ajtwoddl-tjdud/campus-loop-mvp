@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Loop — Reddit 시장 리서치 리포트</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1a2230; --muted:#5b6675; --line:#e4e8ee;
+  --brand:#2563eb; --brand-soft:#eff4ff; --accent:#0e9f6e; --warn:#d97706; --danger:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"SF Pro Text",Segoe UI,Roboto,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;padding:32px 16px 80px}
+.wrap{max-width:1000px;margin:0 auto}
+header.hero{background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#3b82f6);color:#fff;border-radius:20px;padding:44px 44px 40px;margin-bottom:28px}
+header.hero .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;font-weight:600}
+header.hero h1{font-size:34px;line-height:1.25;margin:10px 0 8px;font-weight:800}
+header.hero p.sub{font-size:17px;opacity:.92;max-width:64ch}
+header.hero .meta{margin-top:18px;font-size:13px;opacity:.85;display:flex;gap:18px;flex-wrap:wrap}
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0 8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.stat .n{font-size:26px;font-weight:800;color:var(--brand)}
+.stat .n small{font-size:14px;color:var(--muted);font-weight:600}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:30px 34px;margin-bottom:22px}
+h2{font-size:21px;font-weight:800;margin-bottom:6px}
+h3{font-size:16.5px;font-weight:700;margin:26px 0 10px;padding-top:18px;border-top:1px dashed var(--line)}
+h2 .n{color:var(--brand);margin-right:10px}
+.lede{color:var(--muted);font-size:15px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0 6px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding:8px 10px;white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:#fafbfd}
+.tag{display:inline-block;background:var(--brand-soft);color:var(--brand);border-radius:999px;padding:1px 10px;font-size:12px;font-weight:600;margin:2px 2px 2px 0}
+.tag.green{background:#e7f6ef;color:var(--accent)}
+.tag.amber{background:#fdf3e3;color:var(--warn)}
+.tag.red{background:#fdeaea;color:var(--danger)}
+.callout{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0}
+.callout.warn{border-color:var(--warn);background:#fdf6ec}
+.callout.danger{border-color:var(--danger);background:#fdf1f1}
+.callout p{font-size:14.5px}
+.callout strong{color:var(--brand)}
+.callout.warn strong{color:var(--warn)}
+.callout.danger strong{color:var(--danger)}
+.bars{margin:12px 0 4px}
+.bar-row{display:grid;grid-template-columns:170px 1fr 74px;gap:10px;align-items:center;margin-bottom:6px}
+.bar-label{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{background:#eef1f5;border-radius:6px;height:18px;overflow:hidden}
+.bar-fill{background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:6px;height:100%}
+.bar-value{font-size:12.5px;font-weight:700;color:var(--ink)}
+blockquote{margin:10px 0;padding:10px 16px;border-left:3px solid var(--line);background:#fafbfd;border-radius:0 8px 8px 0;font-size:14px}
+blockquote .src{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+.foot{color:var(--muted);font-size:13px;line-height:1.7}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.kv div{background:#fafbfd;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.kv b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.kv span{font-size:14.5px;font-weight:600}
+.up{color:var(--accent);font-weight:700}.down{color:var(--danger);font-weight:700}
+.rankup{color:var(--accent);font-weight:700}
+.rankdown{color:var(--danger);font-weight:700}
+@media(max-width:720px){
+  header.hero{padding:30px 24px} header.hero h1{font-size:26px}
+  section{padding:22px 20px} .bar-row{grid-template-columns:120px 1fr 60px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Market Research Report</div>
+  <h1>Campus Loop — Reddit 코퍼스 분석 리포트</h1>
+  <p class="sub">교환학생·단기 체류자의 생활키트 렌탈 수요를 Reddit 코퍼스 2개 (7,010개 포스트)로 검증하고, "볼륨 랭킹 vs 수요 밀도 랭킹"의 차이로 시장 진입 지점을 재정렬합니다.</p>
+  <div class="meta"><span>생성일 2026-08-08</span><span>코퍼스: campus_loop (240) + reddit_pain (6,770)</span><span>재생성: <code>python3 scripts/generate_report.py</code></span></div>
+</header>
+
+<div class="stat-strip">
+  <div class="stat"><div class="n">7,010</div><div class="l">전체 포스트</div></div>
+  <div class="stat"><div class="n">84</div><div class="l">서브레딧</div></div>
+  <div class="stat"><div class="n">30</div><div class="l">테마 분류</div></div>
+  <div class="stat"><div class="n">1,076</div><div class="l">high-intent 포스트 (15.3%)</div></div>
+  <div class="stat"><div class="n">14</div><div class="l">시장 도메인</div></div>
+</div>
+
+<section>
+<h2><span class="n">1</span>Executive Summary</h2>
+<p class="lede">두 코퍼스를 교차한 결론. 상세 근거는 뒤 섹션.</p>
+<div class="callout danger">
+<p><strong>핵심 발견 1 — "볼륨 랭킹 ≠ 수요 랭킹".</strong> 기존 랭킹은 대화량을 세는 지표다. 포스트당 구매 의도를
+(Wilson 하한) 기준으로 다시 정렬하면 테마 순위가 최대 <strong>27계단</strong> 움직인다.
+<code>cross_border_ops</code>(968개 포스트, 2위)는 high-intent 0.7%로 25위로 추락하고,
+<code>fitness_tracking</code>(35개, 25위)은 의도 밀도 28.6%로 1위가 된다.</p>
+</div>
+<div class="callout">
+<p><strong>핵심 발견 2 — 밀도가 높은 수요는 소비자용 개인 도구다.</strong> 크롤러는 비즈니스 운영 고통을 타깃으로
+설계됐는데, 실제 가장 절실한 요청 3개는 <code>personal_task_tracking</code>(23.8%), <code>fitness_tracking</code>(21.9%),
+<code>meeting_notes</code>(13.8%) — 사람들이 <em>자기 자신을 위해</em> 도구를 찾는 영역이다.</p>
+</div>
+<div class="callout warn">
+<p><strong>핵심 발견 3 — 볼륨×밀도 모두를 견디는 유일한 테마: scheduling_dispatch (5.5% bound, 475 posts).</strong>
+서비스업(미용실·수리·청소)의 예약·일정·고객 연락을 함께 다루는 일감. 인접 테마(hiring_staffing lift 1.63,
+comms_overload lift 2.21)와 묶여 하나의 코히런트한 직업군을 이룬다.</p>
+</div>
+<div class="callout">
+<p><strong>핵심 발견 4 — Campus Loop 코퍼스: 수요는 "구매"가 아니라 "폐기·반납"에 있다.</strong>
+240개 포스트에서 가장 높은 의도 신호는 침구를 사는 것(<code>buy_for_stay</code>)이 아니라
+<code>Places to Donate Bedding?</code> 같은 "쓰고 버리기" 고통(<code>move_out</code> 53건, <code>luggage_heavy</code> 72건)이다.
+렌탈의 본질적 가치는 구매 회피가 아니라 <strong>폐기 회피</strong>다.</p>
+</div>
+<div class="callout warn">
+<p><strong>핵심 발견 5 — 지명된 기성 도구 웨지는 없다.</strong> 언급된 27개 툴 중 어떤 것도
+강한 불만 비율(0.62x–1.76x baseline)을 넘지 못한다. Excel 99% sour는 순환논리(크롤러가
+<code>spreadsheet</code>·<code>excel</code> 키워드로 매뉴얼 고통을 정의)라 제외 시 0.70x로 baseline 아래다.
+중간권에서 Slack 1.31x, WhatsApp 1.24x 정도가 유의미하다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">2</span>Campus Loop 코퍼스 — 교환학생·단기 체류 (240 posts)</h2>
+<p class="lede">대한민국 입국·단기 체류·기숙사/원룸 생활을 다루는 10개 서브레딧 크롤링 (2026-08-05).</p>
+
+<div class="kv">
+  <div><b>포스트</b><span>240</span></div>
+  <div><b>High-intent</b><span>28 (11.7%)</span></div>
+  <div><b>서브레딧</b><span>10</span></div>
+  <div><b>도메인</b><span>korea_living 121 · mobility 83 · exchange_study 36</span></div>
+  <div><b>수집 방식</b><span>query 200 · sample 40</span></div>
+</div>
+
+<h3>시그널 분포 — 무엇이 이 사람들을 아프게 하는가</h3>
+<div class="bars"><div class="bar-row"><div class="bar-label">luggage_heavy</div><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div><div class="bar-value">72</div></div><div class="bar-row"><div class="bar-label">short_stay</div><div class="bar-track"><div class="bar-fill" style="width:90.3%"></div></div><div class="bar-value">65</div></div><div class="bar-row"><div class="bar-label">move_out</div><div class="bar-track"><div class="bar-fill" style="width:73.6%"></div></div><div class="bar-value">53</div></div><div class="bar-row"><div class="bar-label">frustration</div><div class="bar-track"><div class="bar-fill" style="width:43.1%"></div></div><div class="bar-value">31</div></div><div class="bar-row"><div class="bar-label">bring_advice</div><div class="bar-track"><div class="bar-fill" style="width:37.5%"></div></div><div class="bar-value">27</div></div><div class="bar-row"><div class="bar-label">rent_need</div><div class="bar-track"><div class="bar-fill" style="width:11.1%"></div></div><div class="bar-value">8</div></div><div class="bar-row"><div class="bar-label">unfurnished</div><div class="bar-track"><div class="bar-fill" style="width:11.1%"></div></div><div class="bar-value">8</div></div><div class="bar-row"><div class="bar-label">buy_for_stay</div><div class="bar-track"><div class="bar-fill" style="width:9.7%"></div></div><div class="bar-value">7</div></div><div class="bar-row"><div class="bar-label">temp_gear</div><div class="bar-track"><div class="bar-fill" style="width:8.3%"></div></div><div class="bar-value">6</div></div><div class="bar-row"><div class="bar-label">tool_search</div><div class="bar-track"><div class="bar-fill" style="width:6.9%"></div></div><div class="bar-value">5</div></div><div class="bar-row"><div class="bar-label">waste_money</div><div class="bar-track"><div class="bar-fill" style="width:5.6%"></div></div><div class="bar-value">4</div></div><div class="bar-row"><div class="bar-label">explicit_wish</div><div class="bar-track"><div class="bar-fill" style="width:4.2%"></div></div><div class="bar-value">3</div></div><div class="bar-row"><div class="bar-label">willingness_to_pay</div><div class="bar-track"><div class="bar-fill" style="width:2.8%"></div></div><div class="bar-value">2</div></div></div>
+
+<h3>High-intent 시그널 — 진짜 "도구를 찾는" 요청</h3>
+<p>High-intent 비율 11.7%는 범용 고통 코퍼스(15.5%) 대비 낮은 편이지만,
+시그널의 종류가 더 중요하다: 렌탈·구입·미가구(unfurnished)라는 <strong>상품 형태가 이미 정해진 요청</strong>이다.</p>
+<table><thead><tr><th>signal</th><th>count</th></tr></thead><tbody><tr><td>rent_need</td><td class="num">8</td></tr><tr><td>unfurnished</td><td class="num">8</td></tr><tr><td>buy_for_stay</td><td class="num">7</td></tr><tr><td>tool_search</td><td class="num">5</td></tr><tr><td>explicit_wish</td><td class="num">3</td></tr><tr><td>willingness_to_pay</td><td class="num">2</td></tr></tbody></table>
+<div class="callout">
+<p><strong>읽는 법:</strong> <code>rent_need</code>·<code>unfurnished</code>·<code>buy_for_stay</code>는 렌탈 상품의 3가지 진입점이다.
+이들이 전체 high-intent의 82%를 차지하며, Campus Loop가 팔 수 있는 형태로 이미 발화된 수요다.</p>
+</div>
+
+<h3>대표 증언 (high-intent 상위)</h3>
+<blockquote><a href="https://www.reddit.com/r/digitalnomad/comments/1v2pyus/i_went_to_da_nang_for_a_4_night_vacation_i_never/" target="_blank" rel="noopener">I went to Da Nang for a 4 night vacation. I never left, and I threw away everything I owned back home.</a><span class="src">r/digitalnomad · score=431 · comments=117</span><span style="margin-top:6px;display:block"><span class="tag">rent_need</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/digitalnomad/comments/12wn7nq/after_4_years_were_about_to_end_our_digital_nomad/" target="_blank" rel="noopener">After 4 years, we&#x27;re about to end our digital nomad lifestyle, but are getting cold feet on renting an apartment. Seeking wisdom from fellow DNs who have left this life behind.</a><span class="src">r/digitalnomad · score=19 · comments=36</span><span style="margin-top:6px;display:block"><span class="tag">buy_for_stay</span><span class="tag">rent_need</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/digitalnomad/comments/1hx0rlw/blueground_apartments_bad_experience/" target="_blank" rel="noopener">Blueground apartments - bad experience</a><span class="src">r/digitalnomad · score=43 · comments=10</span><span style="margin-top:6px;display:block"><span class="tag">rent_need</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/digitalnomad/comments/1iyo1bn/what_to_do_with_apartment_while_travelling/" target="_blank" rel="noopener">What to do with apartment while travelling?</a><span class="src">r/digitalnomad · score=0 · comments=41</span><span style="margin-top:6px;display:block"><span class="tag">rent_need</span><span class="tag">unfurnished</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/digitalnomad/comments/13baz7v/housing_for_someone_whos_away_a_lot/" target="_blank" rel="noopener">housing for someone who&#x27;s away a lot?</a><span class="src">r/digitalnomad · score=5 · comments=29</span><span style="margin-top:6px;display:block"><span class="tag">rent_need</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/Living_in_Korea/comments/1qv7ffx/moving_to_seoul_for_work_in_april_first_time_in/" target="_blank" rel="noopener">Moving to Seoul for work in April. First time in Korea, looking for practical advice</a><span class="src">r/Living_in_Korea · score=15 · comments=19</span><span style="margin-top:6px;display:block"><span class="tag">explicit_wish</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/seoul/comments/1qv7gh2/moving_to_seoul_for_work_in_april_first_time_in/" target="_blank" rel="noopener">Moving to Seoul for work in April. First time in Korea, looking for practical advice</a><span class="src">r/seoul · score=7 · comments=20</span><span style="margin-top:6px;display:block"><span class="tag">explicit_wish</span></span></blockquote><blockquote><a href="https://www.reddit.com/r/Living_in_Korea/comments/10zf2dh/best_way_to_quicklycheaply_furnish_an_apartment/" target="_blank" rel="noopener">Best way to quickly/cheaply furnish an apartment. Not looking for anything fancy.</a><span class="src">r/Living_in_Korea · score=9 · comments=15</span><span style="margin-top:6px;display:block"><span class="tag">unfurnished</span></span></blockquote>
+
+<h3>렌탈 가치의 재해석 — 폐기 고통</h3>
+<div class="callout danger">
+<p><strong>가장 강한 단일 시그널은 "쓰고 버리는" 고통이다.</strong> <code>luggage_heavy</code> 72건,
+<code>move_out</code> 53건, <code>frustration</code> 31건. 침구를 사는 것보다 <em>4개월 쓰고 어떻게 버릴지</em>가 더 큰 문제다.
+"Can I donate bedding?" (r/Living_in_Korea)은 렌탈 서비스가 정확히 제거하는 고통을 그대로 말한다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">3</span>범용 고통 코퍼스 — 6,770 posts, 30 themes</h2>
+<p class="lede">14개 시장, 74개 서브레딧에서 고통·지불의사·도구 탐색 시그널로 수집. 아래 표는 분석 파이프라인
+(<code>analyze_pain.py</code> → <code>insights_pain.py</code>)의 clean view (빌더 서브레딧 + 공급측 게시물 제거, 4,842 posts).</p>
+
+<div class="kv">
+  <div><b>포스트</b><span>6,770</span></div>
+  <div><b>서브레딧</b><span>74</span></div>
+  <div><b>시장</b><span>14</span></div>
+  <div><b>테마</b><span>30</span></div>
+  <div><b>High-intent</b><span>1,048 (15.5%)</span></div>
+  <div><b>미분류</b><span>1,297 (19%)</span></div>
+</div>
+
+<h3>시장 구성</h3>
+<table><thead><tr><th>market</th><th>posts</th><th>share</th></tr></thead><tbody><tr><td>software_business</td><td class="num">1,141</td><td class="num">16.9%</td></tr><tr><td>back_office</td><td class="num">835</td><td class="num">12.3%</td></tr><tr><td>cross_border</td><td class="num">787</td><td class="num">11.6%</td></tr><tr><td>smb_operations</td><td class="num">653</td><td class="num">9.6%</td></tr><tr><td>household</td><td class="num">526</td><td class="num">7.8%</td></tr><tr><td>commerce</td><td class="num">500</td><td class="num">7.4%</td></tr><tr><td>local_services</td><td class="num">458</td><td class="num">6.8%</td></tr><tr><td>regulated_professions</td><td class="num">441</td><td class="num">6.5%</td></tr><tr><td>engineering</td><td class="num">418</td><td class="num">6.2%</td></tr><tr><td>independent_work</td><td class="num">304</td><td class="num">4.5%</td></tr><tr><td>go_to_market</td><td class="num">281</td><td class="num">4.2%</td></tr><tr><td>logistics</td><td class="num">169</td><td class="num">2.5%</td></tr><tr><td>attention_health</td><td class="num">133</td><td class="num">2.0%</td></tr><tr><td>fashion_apparel</td><td class="num">124</td><td class="num">1.8%</td></tr></tbody></table>
+
+<h3>시그널 분포</h3>
+<table><thead><tr><th>signal</th><th>posts</th><th>share</th></tr></thead><tbody><tr><td>compliance_admin</td><td class="num">3,044</td><td class="num">45.0%</td></tr><tr><td>manual_toil</td><td class="num">1,299</td><td class="num">19.2%</td></tr><tr><td>cross_border</td><td class="num">1,070</td><td class="num">15.8%</td></tr><tr><td>frustration</td><td class="num">1,013</td><td class="num">15.0%</td></tr><tr><td>willingness_to_pay</td><td class="num">609</td><td class="num">9.0%</td></tr><tr><td>time_drain</td><td class="num">507</td><td class="num">7.5%</td></tr><tr><td>cost_pain</td><td class="num">352</td><td class="num">5.2%</td></tr><tr><td>tool_search</td><td class="num">245</td><td class="num">3.6%</td></tr><tr><td>explicit_wish</td><td class="num">224</td><td class="num">3.3%</td></tr><tr><td>integration_gap</td><td class="num">47</td><td class="num">0.7%</td></tr></tbody></table>
+
+<h3>수요 밀도 랭킹 — Wilson 하한 기준 (clean view)</h3>
+<p class="lede">볼륨 랭킹(<code>analyze_pain</code> 출력)과 비교한 이동 폭. +는 "대화량에 비해 진짜 요청이 많다", −는 반대.</p>
+<table><thead><tr><th>theme</th><th class='num'>posts</th><th class='num'>high-intent</th><th class='num'>rate</th><th class='num'>Wilson bound</th><th class='num'>wt/post</th><th class='num'>volume rank</th><th class='num'>shift</th></tr></thead><tbody><tr><td>personal_task_tracking</td><td>44</td><td>16</td><td>36.4%</td><td>23.8%</td><td>10.4</td><td>25</td><td class="num rankup">+24</td></tr><tr><td>fitness_tracking</td><td>20</td><td>8</td><td>40.0%</td><td>21.9%</td><td>11.1</td><td>29</td><td class="num rankup">+27</td></tr><tr><td>meeting_notes</td><td>21</td><td>6</td><td>28.6%</td><td>13.8%</td><td>11.0</td><td>28</td><td class="num rankup">+25</td></tr><tr><td>self_hosting</td><td>85</td><td>16</td><td>18.8%</td><td>11.9%</td><td>10.4</td><td>17</td><td class="num rankup">+13</td></tr><tr><td>language_learning</td><td>88</td><td>13</td><td>14.8%</td><td>8.8%</td><td>8.3</td><td>22</td><td class="num rankup">+17</td></tr><tr><td>it_admin_ops</td><td>79</td><td>9</td><td>11.4%</td><td>6.1%</td><td>10.8</td><td>18</td><td class="num rankup">+12</td></tr><tr><td>scheduling_dispatch</td><td>475</td><td>36</td><td>7.6%</td><td>5.5%</td><td>8.4</td><td>6</td><td class="num rankdown">-1</td></tr><tr><td>content_marketing_ops</td><td>183</td><td>16</td><td>8.7%</td><td>5.5%</td><td>4.8</td><td>16</td><td class="num rankup">+8</td></tr><tr><td>customer_acquisition</td><td>111</td><td>10</td><td>9.0%</td><td>5.0%</td><td>6.4</td><td>23</td><td class="num rankup">+14</td></tr><tr><td>care_coordination</td><td>97</td><td>7</td><td>7.2%</td><td>3.5%</td><td>6.2</td><td>24</td><td class="num rankup">+14</td></tr><tr><td>comms_overload</td><td>184</td><td>11</td><td>6.0%</td><td>3.4%</td><td>8.3</td><td>12</td><td class="num rankup">+1</td></tr><tr><td>focus_executive_function</td><td>128</td><td>8</td><td>6.2%</td><td>3.2%</td><td>8.3</td><td>15</td><td class="num rankup">+3</td></tr><tr><td>reporting_visibility</td><td>438</td><td>20</td><td>4.6%</td><td>3.0%</td><td>7.7</td><td>7</td><td class="num rankdown">-6</td></tr><tr><td>hiring_staffing</td><td>625</td><td>26</td><td>4.2%</td><td>2.9%</td><td>8.4</td><td>3</td><td class="num rankdown">-11</td></tr><tr><td>customer_support</td><td>260</td><td>12</td><td>4.6%</td><td>2.7%</td><td>8.4</td><td>10</td><td class="num rankdown">-5</td></tr><tr><td>returns_logistics</td><td>379</td><td>15</td><td>4.0%</td><td>2.4%</td><td>7.8</td><td>8</td><td class="num rankdown">-8</td></tr><tr><td>tenancy_property</td><td>124</td><td>6</td><td>4.8%</td><td>2.2%</td><td>9.2</td><td>14</td><td class="num rankdown">-3</td></tr><tr><td>classroom_teaching</td><td>48</td><td>3</td><td>6.2%</td><td>2.1%</td><td>8.6</td><td>26</td><td class="num rankup">+8</td></tr><tr><td>quoting_estimating</td><td>204</td><td>8</td><td>3.9%</td><td>2.0%</td><td>8.9</td><td>11</td><td class="num rankdown">-8</td></tr><tr><td>pricing_of_software</td><td>112</td><td>5</td><td>4.5%</td><td>1.9%</td><td>11.1</td><td>13</td><td class="num rankdown">-7</td></tr><tr><td>bookkeeping_tax</td><td>1213</td><td>30</td><td>2.5%</td><td>1.7%</td><td>9.8</td><td>1</td><td class="num rankdown">-20</td></tr><tr><td>language_translation</td><td>117</td><td>4</td><td>3.4%</td><td>1.3%</td><td>6.3</td><td>21</td><td class="num rankdown">-1</td></tr><tr><td>inventory_supply</td><td>266</td><td>7</td><td>2.6%</td><td>1.3%</td><td>8.4</td><td>9</td><td class="num rankdown">-14</td></tr><tr><td>compliance_licensing</td><td>562</td><td>10</td><td>1.8%</td><td>1.0%</td><td>8.7</td><td>4</td><td class="num rankdown">-20</td></tr><tr><td>getting_paid</td><td>431</td><td>6</td><td>1.4%</td><td>0.6%</td><td>10.0</td><td>5</td><td class="num rankdown">-20</td></tr><tr><td>project_management</td><td>87</td><td>2</td><td>2.3%</td><td>0.6%</td><td>8.9</td><td>20</td><td class="num rankdown">-6</td></tr><tr><td>data_entry_integration</td><td>97</td><td>2</td><td>2.1%</td><td>0.6%</td><td>8.6</td><td>19</td><td class="num rankdown">-8</td></tr><tr><td>reviews_reputation</td><td>60</td><td>1</td><td>1.7%</td><td>0.3%</td><td>5.7</td><td>27</td><td class="num rankdown">-1</td></tr><tr><td>cross_border_ops</td><td>869</td><td>5</td><td>0.6%</td><td>0.2%</td><td>8.2</td><td>2</td><td class="num rankdown">-27</td></tr><tr><td>sizing_fit_apparel</td><td>16</td><td>0</td><td>0.0%</td><td>0.0%</td><td>8.3</td><td>30</td><td class="num ">=</td></tr></tbody></table>
+<div class="callout">
+<p><strong>공급측 오염 제거의 효과:</strong> high-intent 557 → 394 (29%가 "I built X" 자기홍보였음).
+<code>customer_acquisition</code>은 57%가 공급측이었다. 빌더 서브레딧을 이름으로만 제거하면 나머지 70건이
+새어나가기 때문에 본문 1인칭 프레이밍을 함께 검사한다.</p>
+</div>
+
+<h3>테마 공동발생 — 한 제품이 덮을 수 있는 인접 일감</h3>
+<table><thead><tr><th>lift</th><th>joint</th><th>pair</th></tr></thead><tbody><tr><td class="num">3.79</td><td class="num">57</td><td>content_marketing_ops</td></tr><tr><td class="num">3.13</td><td class="num">75</td><td>inventory_supply</td></tr><tr><td class="num">2.89</td><td class="num">48</td><td>comms_overload</td></tr><tr><td class="num">2.66</td><td class="num">65</td><td>customer_support</td></tr><tr><td class="num">2.62</td><td class="num">75</td><td>getting_paid</td></tr><tr><td class="num">2.21</td><td class="num">91</td><td>comms_overload</td></tr><tr><td class="num">2.13</td><td class="num">56</td><td>data_entry_integration</td></tr><tr><td class="num">2.01</td><td class="num">65</td><td>getting_paid</td></tr><tr><td class="num">2.00</td><td class="num">73</td><td>comms_overload</td></tr><tr><td class="num">1.91</td><td class="num">92</td><td>comms_overload</td></tr><tr><td class="num">1.84</td><td class="num">45</td><td>content_marketing_ops</td></tr><tr><td class="num">1.76</td><td class="num">41</td><td>cross_border_ops</td></tr><tr><td class="num">1.68</td><td class="num">73</td><td>content_marketing_ops</td></tr><tr><td class="num">1.68</td><td class="num">233</td><td>bookkeeping_tax</td></tr><tr><td class="num">1.67</td><td class="num">58</td><td>customer_acquisition</td></tr><tr><td class="num">1.63</td><td class="num">159</td><td>hiring_staffing</td></tr><tr><td class="num">1.58</td><td class="num">51</td><td>quoting_estimating</td></tr><tr><td class="num">1.50</td><td class="num">65</td><td>customer_support</td></tr></tbody></table>
+<div class="callout">
+<p><strong>견적 → 인보이스 → 대금 독촉 루프:</strong> <code>getting_paid + quoting_estimating</code> (2.62x, 75건),
+<code>bookkeeping_tax + getting_paid</code> (233건). 서비스업 사장의 하루는 서로 붙어 있는 작은 일감들이다 —
+한쪽만 자동화하면 나머지는 그대로 남는다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">4</span>시장 전용 테마 (Market Lift)</h2>
+<p class="lede">테마가 특정 시장에 얼마나 집중돼 있는가 (1.0 = 전 시장 공통 고통). 높을수록 이름 붙일 수 있는
+구매자가 있다는 뜻.</p>
+<table><thead><tr><th>lift</th><th>theme</th><th>market</th><th>in-cell</th><th>theme n</th></tr></thead><tbody><tr><td class="num">17.88</td><td>personal_task_tracking</td><td>attention_health</td><td class="num">26</td><td class="num">74</td></tr><tr><td class="num">10.89</td><td>classroom_teaching</td><td>regulated_professions</td><td class="num">39</td><td class="num">55</td></tr><tr><td class="num">10.83</td><td>self_hosting</td><td>engineering</td><td class="num">101</td><td class="num">151</td></tr><tr><td class="num">9.77</td><td>care_coordination</td><td>household</td><td class="num">82</td><td class="num">108</td></tr><tr><td class="num">8.45</td><td>it_admin_ops</td><td>engineering</td><td class="num">48</td><td class="num">92</td></tr><tr><td class="num">7.69</td><td>inventory_supply</td><td>logistics</td><td class="num">67</td><td class="num">349</td></tr><tr><td class="num">7.16</td><td>language_learning</td><td>cross_border</td><td class="num">94</td><td class="num">113</td></tr><tr><td class="num">7.07</td><td>tenancy_property</td><td>regulated_professions</td><td class="num">70</td><td class="num">152</td></tr><tr><td class="num">4.59</td><td>cross_border_ops</td><td>cross_border</td><td class="num">517</td><td class="num">968</td></tr><tr><td class="num">4.14</td><td>returns_logistics</td><td>logistics</td><td class="num">48</td><td class="num">465</td></tr><tr><td class="num">3.94</td><td>content_marketing_ops</td><td>commerce</td><td class="num">104</td><td class="num">357</td></tr><tr><td class="num">3.89</td><td>customer_acquisition</td><td>go_to_market</td><td class="num">46</td><td class="num">285</td></tr><tr><td class="num">3.01</td><td>language_translation</td><td>cross_border</td><td class="num">57</td><td class="num">163</td></tr><tr><td class="num">2.74</td><td>project_management</td><td>back_office</td><td class="num">48</td><td class="num">142</td></tr><tr><td class="num">2.50</td><td>bookkeeping_tax</td><td>back_office</td><td class="num">461</td><td class="num">1498</td></tr><tr><td class="num">2.44</td><td>data_entry_integration</td><td>software_business</td><td class="num">89</td><td class="num">216</td></tr><tr><td class="num">2.36</td><td>customer_support</td><td>commerce</td><td class="num">62</td><td class="num">356</td></tr><tr><td class="num">2.16</td><td>comms_overload</td><td>software_business</td><td class="num">144</td><td class="num">395</td></tr><tr><td class="num">2.09</td><td>scheduling_dispatch</td><td>local_services</td><td class="num">100</td><td class="num">707</td></tr><tr><td class="num">2.03</td><td>getting_paid</td><td>back_office</td><td class="num">157</td><td class="num">627</td></tr><tr><td class="num">1.97</td><td>focus_executive_function</td><td>household</td><td class="num">29</td><td class="num">189</td></tr><tr><td class="num">1.94</td><td>hiring_staffing</td><td>back_office</td><td class="num">224</td><td class="num">935</td></tr><tr><td class="num">1.85</td><td>quoting_estimating</td><td>smb_operations</td><td class="num">55</td><td class="num">309</td></tr><tr><td class="num">1.79</td><td>pricing_of_software</td><td>smb_operations</td><td class="num">30</td><td class="num">174</td></tr><tr><td class="num">1.78</td><td>reporting_visibility</td><td>software_business</td><td class="num">247</td><td class="num">824</td></tr><tr><td class="num">1.69</td><td>reviews_reputation</td><td>software_business</td><td class="num">29</td><td class="num">102</td></tr><tr><td class="num">1.52</td><td>compliance_licensing</td><td>engineering</td><td class="num">72</td><td class="num">765</td></tr></tbody></table>
+<div class="callout warn">
+<p><strong>lift가 곧 고객 정체성이다:</strong> <code>personal_task_tracking</code>은 attention_health에서 17.9x.
+소비자 대상 도구는 "모든 사람"이 아니라 "고통이 집중된 한 구역"에서 먼저 팔아야 한다는 정렬을 보여준다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">5</span>지명된 기성 도구 (Incumbent Wedge)</h2>
+<p class="lede">이름이 거론된 툴 중 불만이 집중된 곳 = 전환 트리거가 이미 존재하는 곳. 소량(n&lt;30)은 노이즈.
+Excel 99% sour는 정의상 순환이므로 strict% 기준으로 읽는다.</p>
+<table><thead><tr><th>tool</th><th class="num">mentions</th><th class="num">sour%</th><th class="num">strict%</th><th class="num">vs base</th><th class="num">intent%</th></tr></thead><tbody>
+<tr><td>Mailchimp</td><td class="num">15</td><td class="num">73%</td><td class="num">47%</td><td class="num">1.76x</td><td class="num">0%</td></tr><tr><td>Klaviyo</td><td class="num">15</td><td class="num">53%</td><td class="num">47%</td><td class="num">1.76x</td><td class="num">0%</td></tr><tr><td>WooCommerce</td><td class="num">22</td><td class="num">50%</td><td class="num">45%</td><td class="num">1.72x</td><td class="num">0%</td></tr><tr><td>Amazon Seller</td><td class="num">37</td><td class="num">43%</td><td class="num">38%</td><td class="num">1.43x</td><td class="num">0%</td></tr><tr><td>Claude</td><td class="num">174</td><td class="num">59%</td><td class="num">37%</td><td class="num">1.41x</td><td class="num">2%</td></tr><tr><td>Calendly</td><td class="num">19</td><td class="num">84%</td><td class="num">37%</td><td class="num">1.39x</td><td class="num">11%</td></tr><tr><td>Canva</td><td class="num">25</td><td class="num">64%</td><td class="num">36%</td><td class="num">1.36x</td><td class="num">8%</td></tr><tr><td>Slack</td><td class="num">101</td><td class="num">73%</td><td class="num">35%</td><td class="num">1.31x</td><td class="num">6%</td></tr><tr><td>n8n</td><td class="num">24</td><td class="num">54%</td><td class="num">33%</td><td class="num">1.26x</td><td class="num">8%</td></tr><tr><td>Trello</td><td class="num">15</td><td class="num">67%</td><td class="num">33%</td><td class="num">1.26x</td><td class="num">13%</td></tr><tr><td>WhatsApp</td><td class="num">107</td><td class="num">58%</td><td class="num">33%</td><td class="num">1.24x</td><td class="num">7%</td></tr><tr><td>eBay</td><td class="num">37</td><td class="num">57%</td><td class="num">32%</td><td class="num">1.23x</td><td class="num">5%</td></tr><tr><td>ChatGPT</td><td class="num">261</td><td class="num">54%</td><td class="num">32%</td><td class="num">1.22x</td><td class="num">6%</td></tr><tr><td>Etsy</td><td class="num">70</td><td class="num">43%</td><td class="num">31%</td><td class="num">1.19x</td><td class="num">4%</td></tr><tr><td>Stripe</td><td class="num">138</td><td class="num">51%</td><td class="num">31%</td><td class="num">1.18x</td><td class="num">5%</td></tr><tr><td>HubSpot</td><td class="num">26</td><td class="num">65%</td><td class="num">31%</td><td class="num">1.16x</td><td class="num">4%</td></tr><tr><td>Shopify</td><td class="num">259</td><td class="num">54%</td><td class="num">31%</td><td class="num">1.15x</td><td class="num">9%</td></tr><tr><td>WordPress</td><td class="num">33</td><td class="num">42%</td><td class="num">30%</td><td class="num">1.14x</td><td class="num">9%</td></tr><tr><td>Zapier</td><td class="num">41</td><td class="num">76%</td><td class="num">29%</td><td class="num">1.11x</td><td class="num">2%</td></tr><tr><td>Notion</td><td class="num">94</td><td class="num">71%</td><td class="num">29%</td><td class="num">1.09x</td><td class="num">12%</td></tr><tr><td>Airtable</td><td class="num">19</td><td class="num">74%</td><td class="num">26%</td><td class="num">0.99x</td><td class="num">11%</td></tr><tr><td>Salesforce</td><td class="num">23</td><td class="num">70%</td><td class="num">26%</td><td class="num">0.99x</td><td class="num">0%</td></tr><tr><td>Jira</td><td class="num">30</td><td class="num">70%</td><td class="num">23%</td><td class="num">0.88x</td><td class="num">7%</td></tr><tr><td>Xero</td><td class="num">44</td><td class="num">45%</td><td class="num">20%</td><td class="num">0.77x</td><td class="num">7%</td></tr><tr><td>SAP</td><td class="num">20</td><td class="num">55%</td><td class="num">20%</td><td class="num">0.76x</td><td class="num">0%</td></tr><tr><td>QuickBooks</td><td class="num">169</td><td class="num">43%</td><td class="num">19%</td><td class="num">0.72x</td><td class="num">6%</td></tr><tr><td>Excel/Sheets</td><td class="num">898</td><td class="num">99%</td><td class="num">19%</td><td class="num">0.70x</td><td class="num">4%</td></tr><tr><td>PayPal</td><td class="num">49</td><td class="num">31%</td><td class="num">16%</td><td class="num">0.62x</td><td class="num">0%</td></tr>
+</tbody></table>
+<div class="callout">
+<p><strong>결론:</strong> 뚜렷한 지명 웨지 없음 (0.62x–1.76x). 중간권 Slack 1.31x, WhatsApp 1.24x, Shopify 1.15x만
+기억할 만하다. QuickBooks는 baseline 아래(0.72x) — 회계 툴 불만이 "소프트웨어 교체"보다 "직원 고용"으로 향한다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">6</span>트렌드 (query-sourced, 반기별 share)</h2>
+<p class="lede">날짜 고정 샘플링(<code>sample:</code>)은 크롤 일정을 측정하므로 제외하고 query-sourced 포스트만 사용.
+공유율 기반이라 전체 증가에 면역이지만, 아카이브 쿼리 한계 때문에 방향성 지표로만 읽는다.</p>
+<table><thead><tr><th>theme</th><th>2025H1</th><th>2025H2</th><th>2026H1</th><th>2026H2</th><th>delta</th></tr></thead><tbody><tr><td>hiring_staffing</td><td>10.3%</td><td>16.5%</td><td>16.0%</td><td>17.0%</td><td class="num up">+6.8%</td></tr><tr><td>bookkeeping_tax</td><td>19.8%</td><td>16.8%</td><td>19.0%</td><td>23.1%</td><td class="num up">+3.3%</td></tr><tr><td>customer_acquisition</td><td>1.7%</td><td>6.0%</td><td>6.3%</td><td>4.2%</td><td class="num up">+2.5%</td></tr><tr><td>quoting_estimating</td><td>3.1%</td><td>4.7%</td><td>5.9%</td><td>5.1%</td><td class="num up">+2.0%</td></tr><tr><td>scheduling_dispatch</td><td>12.0%</td><td>11.7%</td><td>12.9%</td><td>13.7%</td><td class="num up">+1.7%</td></tr><tr><td>compliance_licensing</td><td>9.7%</td><td>10.0%</td><td>10.8%</td><td>11.0%</td><td class="num up">+1.3%</td></tr><tr><td>tenancy_property</td><td>2.7%</td><td>1.4%</td><td>2.2%</td><td>3.9%</td><td class="num up">+1.2%</td></tr><tr><td>comms_overload</td><td>4.9%</td><td>7.4%</td><td>8.3%</td><td>5.9%</td><td class="num up">+1.0%</td></tr><tr><td>classroom_teaching</td><td>0.2%</td><td>1.1%</td><td>1.0%</td><td>1.2%</td><td class="num up">+1.0%</td></tr><tr><td>reviews_reputation</td><td>1.6%</td><td>2.1%</td><td>1.3%</td><td>2.4%</td><td class="num up">+0.9%</td></tr><tr><td>reporting_visibility</td><td>14.0%</td><td>15.4%</td><td>14.8%</td><td>14.8%</td><td class="num up">+0.8%</td></tr><tr><td>customer_support</td><td>5.2%</td><td>6.1%</td><td>6.9%</td><td>6.0%</td><td class="num up">+0.8%</td></tr><tr><td>getting_paid</td><td>8.9%</td><td>10.7%</td><td>9.1%</td><td>9.5%</td><td class="num up">+0.6%</td></tr><tr><td>it_admin_ops</td><td>1.6%</td><td>1.7%</td><td>1.6%</td><td>2.0%</td><td class="num up">+0.4%</td></tr><tr><td>pricing_of_software</td><td>2.1%</td><td>2.9%</td><td>2.8%</td><td>2.4%</td><td class="num up">+0.3%</td></tr><tr><td>data_entry_integration</td><td>3.1%</td><td>3.8%</td><td>4.6%</td><td>3.2%</td><td class="num up">+0.1%</td></tr><tr><td>care_coordination</td><td>2.3%</td><td>1.0%</td><td>1.6%</td><td>2.3%</td><td class="num down">-0.1%</td></tr><tr><td>self_hosting</td><td>3.3%</td><td>1.7%</td><td>3.1%</td><td>3.2%</td><td class="num down">-0.1%</td></tr><tr><td>content_marketing_ops</td><td>5.4%</td><td>8.8%</td><td>7.8%</td><td>5.3%</td><td class="num down">-0.2%</td></tr><tr><td>sizing_fit_apparel</td><td>0.6%</td><td>0.3%</td><td>0.7%</td><td>0.3%</td><td class="num down">-0.3%</td></tr><tr><td>personal_task_tracking</td><td>1.9%</td><td>2.0%</td><td>1.3%</td><td>1.2%</td><td class="num down">-0.7%</td></tr><tr><td>meeting_notes</td><td>1.2%</td><td>0.8%</td><td>0.8%</td><td>0.2%</td><td class="num down">-1.0%</td></tr><tr><td>returns_logistics</td><td>7.0%</td><td>7.9%</td><td>8.3%</td><td>5.9%</td><td class="num down">-1.1%</td></tr><tr><td>fitness_tracking</td><td>1.6%</td><td>0.4%</td><td>0.8%</td><td>0.2%</td><td class="num down">-1.4%</td></tr><tr><td>focus_executive_function</td><td>4.7%</td><td>3.6%</td><td>2.7%</td><td>3.2%</td><td class="num down">-1.5%</td></tr><tr><td>project_management</td><td>3.3%</td><td>3.1%</td><td>1.7%</td><td>1.7%</td><td class="num down">-1.6%</td></tr><tr><td>language_learning</td><td>3.3%</td><td>3.2%</td><td>1.7%</td><td>1.5%</td><td class="num down">-1.8%</td></tr><tr><td>cross_border_ops</td><td>13.8%</td><td>7.3%</td><td>12.9%</td><td>11.8%</td><td class="num down">-2.0%</td></tr><tr><td>language_translation</td><td>3.7%</td><td>3.2%</td><td>3.0%</td><td>1.7%</td><td class="num down">-2.0%</td></tr><tr><td>inventory_supply</td><td>6.2%</td><td>7.1%</td><td>5.9%</td><td>3.9%</td><td class="num down">-2.3%</td></tr></tbody></table>
+</section>
+
+<section>
+<h2><span class="n">7</span>문자 그대로의 요청 (Verbatim Demand)</h2>
+<p class="lede">high-intent 포스트에서 요청 절만 추출한 것 — 코퍼스가 피처 리스트에 가장 가까운 조각.</p>
+<blockquote><a href="https://www.reddit.com/r/sales/comments/1psi5mz/outside_reps_how_do_you_plan_your_routes_on_road/" target="_blank" rel="noopener">Outside reps, how do you plan your routes on road days?</a><span class="src">r/sales · 2025-12-21 · score=20 c=45</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“is there an app that does this all for you”</span></blockquote><blockquote><a href="https://www.reddit.com/r/startups/comments/1n1ndmq/whatre_you_still_doing_manually_that_you_wish_was/" target="_blank" rel="noopener">What&#x27;re you still doing manually that you wish was automated? (i will not promote)</a><span class="src">r/startups · 2025-08-27 · score=14 c=48</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“I wish there was a prompt-based platform for automations rather than drag and drop”</span></blockquote><blockquote><a href="https://www.reddit.com/r/projectmanagement/comments/1rkm1sd/any_usefully_tool_for_timeline_and_roadmaps/" target="_blank" rel="noopener">Any usefully tool for timeline and roadmaps?</a><span class="src">r/projectmanagement · 2026-03-04 · score=8 c=32</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“looking for a tool that would help and visualize a timeline that has 30+ actions which are presented in a week by week manner”</span></blockquote><blockquote><a href="https://www.reddit.com/r/Construction/comments/1rj1hlw/why_is_there_no_simple_multi_site_tracker/" target="_blank" rel="noopener">Why is there no simple multi site tracker?</a><span class="src">r/Construction · 2026-03-02 · score=0 c=3</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“looking for an app to organize progress, materials, notes, photos that could sync between everyone on a crew”</span></blockquote><blockquote><a href="https://www.reddit.com/r/Depop/comments/1nvr1hf/whats_going_on_with_the_amount_of_dropshippers/" target="_blank" rel="noopener">Whats going on with the amount of dropshippers??</a><span class="src">r/Depop · 2025-10-02 · score=53 c=16</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“i wish there was a way to filter out these “Brand New” clothes that cost more than $35 CAD”</span></blockquote><blockquote><a href="https://www.reddit.com/r/msp/comments/1srye3a/microsoft_should_make_conditional_access/" target="_blank" rel="noopener">Microsoft should make Conditional Access available to everyone</a><span class="src">r/msp · 2026-04-21 · score=339 c=146</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“I wish there was a way to scream this louder but I wish Microsoft would just open up Conditional Access to all of the Microsoft 365 packages”</span></blockquote><blockquote><a href="https://www.reddit.com/r/solotravel/comments/1jyw802/i_wish_there_were_more_affordable_solo_hostel/" target="_blank" rel="noopener">I wish there were more affordable, solo hostel rooms</a><span class="src">r/solotravel · 2025-04-14 · score=359 c=146</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“I wish there were more affordable, solo hostel rooms With male dorms being a rarity and that I&#x27;m a 44 year old man, I don&#x27;t like the feeling that I look like the creepy guy wit”</span></blockquote><blockquote><a href="https://www.reddit.com/r/Parenting/comments/1pmypy1/what_little_everyday_moments_do_you_wish_you/" target="_blank" rel="noopener">What little everyday moments do you wish you could catch on camera?</a><span class="src">r/Parenting · 2025-12-15 · score=30 c=22</span><span style="margin-top:4px;display:block;color:var(--brand);font-weight:600">“I wish there was some tiny thing rolling around on the floor recording stuff before she notices anything”</span></blockquote>
+</section>
+
+<section>
+<h2><span class="n">8</span>Campus Loop 실행 권고</h2>
+<div class="callout">
+<p><strong>시장 검증 요약 (CAMPUS_LOOP_KOREA_MARKET.md):</strong> 수요는 존재한다 — 한국 대학 기숙사는
+전례 없이 침구를 미제공하고(8개 대학 확인), 교환학생 7.4만 명/년이 도착 첫날 침구를 찾아 헤맨다.
+일본은 월 ¥2,000-2,300 침구 렌탈로 이미 검증했다. <strong>그러나 다이소·쿠팡이 저렴한 대체재</strong>이므로
+"렌탈 비용 &lt; 구매+폐기 비용"이 성립해야 한다.</p>
+</div>
+<ol style="margin:12px 0 12px 22px;line-height:1.8">
+  <li><strong>침구 렌탈 단품으로 시작</strong> (A) — 기숙사 정책이 수요를 강제, MVP 예약 플로우 재사용, 일본 가격 검증 완료.</li>
+  <li><strong>학교 채널이 유통의 핵심</strong> — 국제처 오리엔테이션 채널 1곳 확보가 성공 기준 1번.</li>
+  <li><strong>위생·품질로 다이소와 차별화</strong> — 렌탈 vs 다이소가 품질에서 져선 안 된다.</li>
+  <li><strong>B2B(대학·생활관 공급)가 장기 목표</strong> — 일본처럼 내장되면 B2C 시장이 줄어든다.</li>
+</ol>
+<div class="callout danger">
+<p><strong>첫 검증 액션:</strong> 서울 소재 대학 2-3곳 국제처에 "기숙사 침구 미제공 정책 + 본 리포트"를 들고
+침구 렌탈 파일럿 수락 여부를 묻는 것. 학교가 Yes라고 하면 수요의 80%가 검증된 것이다.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="n">9</span>방법론·제약 (Caveats)</h2>
+<ul class="foot" style="margin-left:20px">
+  <li>범용 코퍼스의 28%가 단일 구문 쿼리 <code>would pay for</code> (1,876 posts)에서 왔다. 해당 쿼리 비중이 30%+
+    인 테마(returns_logistics, quoting_estimating, hiring_staffing)는 부분적으로 그 구문을 측정한 것이다.</li>
+  <li>의도율은 필터 후 분자가 6–41 posts로 작다. Wilson 하한이 순서만 지키고 증거를 만들지는 않는다.</li>
+  <li>코퍼스 하한은 2025-01-01 — 그 이전 패턴은 이 데이터로 말할 수 없다.</li>
+  <li>월별 카운트는 크롤러의 ANCHOR 날짜에 스파이크가 생긴다. 추세는 query-sourced 공유율만 사용했다.</li>
+  <li>미분류 잔여물 1,297건 중 진짜 갭은 intent 라벨이 남은 143건뿐이다. 나머지는 빌더 홍보(~320)나
+    제품 형태가 없는 고통(회계 커리어·채무·정서적 지지)이다.</li>
+</ul>
+</section>
+
+<footer class="foot">
+  <p>생성: <code>research/reddit-corpus/scripts/generate_report.py</code> · 데이터: <code>data/campus_loop_corpus.jsonl</code>
+  (240 posts), <code>data/reddit_pain_corpus.jsonl</code> (6,770 posts) · 분석: <code>analysis/insights_full.txt</code>,
+  <code>analysis/insights_clean.txt</code>, <code>analysis/ANALYSIS.md</code>,
+  <code>analysis/CAMPUS_LOOP_KOREA_MARKET.md</code></p>
+  <p style="margin-top:6px">Arctic Shift Reddit 아카이브 기반. 비공개 리서치 목적 수집. 팀 내 공유용.</p>
+</footer>
+
+</div>
+</body>
+</html>
