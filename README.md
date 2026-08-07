@@ -1,32 +1,53 @@
 # Campus Loop MVP
 
-NTU·NTNU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 웹 MVP입니다.
+NTU·NTNU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 MVP입니다.
 
 **Live:** [campus-loop.pages.dev](https://campus-loop.pages.dev)
 
-## 실행
+## 프로젝트 구조
+
+```text
+campus-loop-mvp/
+├── web/  # React + Vite 고객 웹, Cloudflare Pages 배포 단위
+└── api/  # FastAPI API 골격
+```
+
+`VITE_API_BASE_URL`이 설정된 환경에서는 예약 확정 시 `web/`이 `api/`에 예약을 전송하고, FastAPI가 검증·가격 계산 후 SQLite에 저장합니다. 아직 API를 배포하지 않은 프로덕션 빌드는 기존처럼 브라우저 `localStorage`에만 저장합니다.
+
+## Web 실행
 
 ```bash
 npm install
-npm run dev
+npm run dev:web
 ```
 
-프로덕션 빌드:
+프로덕션 빌드 및 Cloudflare Pages 직접 배포:
 
 ```bash
-npm run build
-npm run preview
+VITE_API_BASE_URL=https://your-api.example.com npm run build
+npm run preview:web
+npm run deploy:web
 ```
 
-정적 배포 시 `dist/` 폴더를 사용합니다.
+정적 배포 산출물은 `web/dist/`입니다. Wrangler 4 실행에는 Node.js 22 이상이 필요합니다.
 
-Cloudflare Pages 직접 배포:
+## API 실행
+
+Python 3.12 이상과 [uv](https://docs.astral.sh/uv/)를 기준으로 합니다.
 
 ```bash
-# Wrangler 4 requires Node.js 22+
-npm run build
-npm run deploy
+cd api
+uv sync --dev
+uv run fastapi dev
 ```
+
+- Health check: `GET http://127.0.0.1:8000/api/v1/health`
+- 예약 생성: `POST http://127.0.0.1:8000/api/v1/reservations`
+- OpenAPI UI: `http://127.0.0.1:8000/docs`
+- 테스트: `uv run pytest`
+- 린트: `uv run ruff check .`
+
+로컬 웹은 기본적으로 `http://127.0.0.1:8000` API를 호출합니다. 프로덕션에서 서버 저장을 활성화할 때 `VITE_API_BASE_URL`을 설정합니다. 설정하지 않으면 브라우저 저장 모드로 유지됩니다. API에서 다른 웹 origin을 허용하려면 `api/.env.example`을 참고해 `CORS_ORIGINS`를 설정합니다.
 
 ## 구현 범위
 
@@ -41,7 +62,7 @@ npm run deploy
 - 모바일·데스크톱 반응형 UI
 - 기존 예약 MVP에서 진입할 수 있는 `What's Campus Loop` 서비스 소개 화면
 
-실제 결제, 서버 데이터베이스, 이메일·LINE 발송은 MVP 범위에서 제외했습니다. 예약 정보는 현재 브라우저의 `localStorage`에만 저장됩니다.
+예약은 기본적으로 `api/data/campus_loop.db`에 저장됩니다. 실제 결제, 관리자 인증, 이메일·LINE 발송은 아직 구현하지 않았으며, 인증 전까지 예약 목록·연락처 조회 API는 공개하지 않습니다.
 
 ## 문서와 디자인
 

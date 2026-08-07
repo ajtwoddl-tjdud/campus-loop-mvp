@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BedDouble, Box, CalendarDays, Check, ChevronDown,
   CircleCheck, Droplets, Home, Layers3, Leaf, MapPin, Menu, PackageCheck,
@@ -9,8 +9,10 @@ import {
   bundles, campuses, localized, money, purchaseProducts, rentalProducts, stayOptions,
 } from './data.js'
 import { copy } from './i18n.js'
+import { createReservation, reservationApiEnabled } from './api.js'
 
 const STORAGE_KEY = 'campus-loop-reservation-v2'
+const STORAGE_VERSION = 2
 const languages = ['en', 'ko', 'zh']
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const rentalIcons = { Wind, Shirt, PackageOpen, PanelTop, Utensils, SprayCan }
@@ -30,6 +32,33 @@ const storyCategories = [
   { label: 'Dining & cookware', icon: Utensils },
   { label: 'Bedding', icon: BedDouble, isNew: true },
 ]
+
+function loadStoredReservation() {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY)
+    if (!value) return null
+
+    const reservation = JSON.parse(value)
+    return reservation?.version === STORAGE_VERSION ? reservation : null
+  } catch {
+    return null
+  }
+}
+
+function createLocalReservation({ profile, storage, rentalIds, purchaseIds, pickup }) {
+  const rental = rentalProducts.reduce((sum, item) => rentalIds.includes(item.id) ? sum + item.price : sum, 0)
+  const purchase = purchaseProducts.reduce((sum, item) => purchaseIds.includes(item.id) ? sum + item.price : sum, 0)
+  return {
+    id: `CL-LOCAL-${window.crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+    profile,
+    storage,
+    rentalIds,
+    purchaseIds,
+    pickup,
+    totals: { rental, purchase },
+    createdAt: new Date().toISOString(),
+  }
+}
 
 function Logo() {
   return <a href="#top" className="logo" aria-label="Campus Loop home"><span className="loop-mark"><span /></span>Campus Loop</a>
@@ -281,6 +310,7 @@ function BuyStep({ rentalIds, purchaseIds, setPurchaseIds, language, t, back, ne
 
 function PickupStep({ profile, pickup, setPickup, rentalIds, purchaseIds, language, t, back, next }) {
   const campus = campuses[profile.campus]
+  const availableDates = campus.dates.filter((date) => date >= profile.startDate && date <= profile.endDate)
   return (
     <div className="builder-content product-layout">
       <section className="main-panel">
@@ -289,7 +319,7 @@ function PickupStep({ profile, pickup, setPickup, rentalIds, purchaseIds, langua
           <div>
             <label className="field-label">{t.pickupLocation}</label>
             <div className="static-input"><MapPin size={18} />{campus.pickup}</div>
-            <fieldset><legend>{t.pickupDate}</legend><div className="option-row">{campus.dates.map((date) => <button type="button" className={pickup.date === date ? 'selected' : ''} onClick={() => setPickup((current) => ({ ...current, date }))} key={date}>{date.slice(5).replace('-', '/')}</button>)}</div></fieldset>
+            <fieldset><legend>{t.pickupDate}</legend><div className="option-row">{availableDates.length ? availableDates.map((date) => <button type="button" className={pickup.date === date ? 'selected' : ''} onClick={() => setPickup((current) => ({ ...current, date }))} key={date}>{date.slice(5).replace('-', '/')}</button>) : <p className="error">{t.noPickupDates}</p>}</div></fieldset>
             <fieldset><legend>{t.pickupTime}</legend><div className="option-row two">{['10:00–12:00', '14:00–16:00'].map((time) => <button type="button" className={pickup.time === time ? 'selected' : ''} onClick={() => setPickup((current) => ({ ...current, time }))} key={time}>{time}</button>)}</div></fieldset>
           </div>
           <div className="return-card">
@@ -302,13 +332,13 @@ function PickupStep({ profile, pickup, setPickup, rentalIds, purchaseIds, langua
       </section>
       <aside className="summary-panel">
         <OrderSummary rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} />
-        <Actions back={back} next={next} nextLabel={t.continueContact} backLabel={t.back} />
+        <Actions back={back} next={next} nextLabel={t.continueContact} backLabel={t.back} disabled={!availableDates.length} />
       </aside>
     </div>
   )
 }
 
-function ContactStep({ contact, setContact, rentalIds, purchaseIds, language, t, back, submit }) {
+function ContactStep({ contact, setContact, rentalIds, purchaseIds, language, t, back, submit, submitting, submissionError }) {
   const [errors, setErrors] = useState({})
   const update = (key, value) => setContact((current) => ({ ...current, [key]: value }))
   const validate = () => {
@@ -337,7 +367,8 @@ function ContactStep({ contact, setContact, rentalIds, purchaseIds, language, t,
       </section>
       <aside className="summary-panel">
         <OrderSummary rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} />
-        <Actions back={back} next={validate} nextLabel={t.confirm} backLabel={t.back} />
+        {submissionError ? <p className="error product-error">{submissionError}</p> : null}
+        <Actions back={back} next={validate} nextLabel={submitting ? t.submitting : t.confirm} backLabel={t.back} disabled={submitting} />
       </aside>
     </div>
   )
@@ -478,18 +509,11 @@ function App() {
   const [purchaseIds, setPurchaseIds] = useState([])
   const [pickup, setPickup] = useState({ date: campuses.NTU.dates[1], time: '10:00–12:00' })
   const [contact, setContact] = useState({ name: '', email: '', line: '', agree: false })
-  const [reservation, setReservation] = useState(null)
+  const [reservation, setReservation] = useState(loadStoredReservation)
+  const [submitting, setSubmitting] = useState(false)
+  const [submissionError, setSubmissionError] = useState('')
   const builderRef = useRef(null)
   const t = copy[language]
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) setReservation(JSON.parse(saved))
-    } catch {
-      // The confirmation flow still works when storage is unavailable.
-    }
-  }, [])
 
   useEffect(() => {
     document.documentElement.lang = language === 'zh' ? 'zh-Hant' : language
@@ -502,15 +526,13 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!campuses[profile.campus].dates.includes(pickup.date)) {
-      setPickup((current) => ({ ...current, date: campuses[profile.campus].dates[1] }))
+    const availableDates = campuses[profile.campus].dates.filter(
+      (date) => date >= profile.startDate && date <= profile.endDate,
+    )
+    if (!availableDates.includes(pickup.date)) {
+      setPickup((current) => ({ ...current, date: availableDates[0] ?? '' }))
     }
-  }, [pickup.date, profile.campus])
-
-  const totals = useMemo(() => ({
-    rental: rentalProducts.reduce((sum, item) => rentalIds.includes(item.id) ? sum + item.price : sum, 0),
-    purchase: purchaseProducts.reduce((sum, item) => purchaseIds.includes(item.id) ? sum + item.price : sum, 0),
-  }), [purchaseIds, rentalIds])
+  }, [pickup.date, profile.campus, profile.endDate, profile.startDate])
 
   const scrollToBuilder = () => builderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   const go = (nextStep) => {
@@ -529,35 +551,36 @@ function App() {
     }
     window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'stay_type_selected', stayType } }))
   }
-  const submit = () => {
-    const saved = {
-      id: `CL-${new Date().getFullYear().toString().slice(-2)}${String(Math.floor(10000 + Math.random() * 90000))}`,
-      version: 2,
-      profile,
-      storage,
-      rentalIds,
-      purchaseIds,
-      pickup,
-      contact: { ...contact, agree: true },
-      totals,
-      createdAt: new Date().toISOString(),
-    }
-    setReservation(saved)
+  const submit = async () => {
+    setSubmitting(true)
+    setSubmissionError('')
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
+      const payload = { profile, storage, rentalIds, purchaseIds, pickup, contact }
+      const response = reservationApiEnabled
+        ? await createReservation(payload)
+        : createLocalReservation(payload)
+      const saved = { ...response, version: STORAGE_VERSION, contact }
+      setReservation(saved)
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
+      } catch {
+        // The server reservation and visible confirmation remain available.
+      }
+      setStep(6)
+      window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'reservation_submitted', school: profile.campus, stayType: profile.stayType, total: response.totals.rental + response.totals.purchase } }))
+      requestAnimationFrame(scrollToBuilder)
     } catch {
-      // The visible confirmation remains available.
+      setSubmissionError(t.submissionError)
+    } finally {
+      setSubmitting(false)
     }
-    setStep(6)
-    window.dispatchEvent(new CustomEvent('campus-loop:event', { detail: { name: 'reservation_submitted', school: profile.campus, stayType: profile.stayType, total: totals.rental + totals.purchase } }))
-    requestAnimationFrame(scrollToBuilder)
   }
   const reset = () => {
     setStep(1)
     setContact({ name: '', email: '', line: '', agree: false })
     requestAnimationFrame(scrollToBuilder)
   }
-  const cycleLanguage = () => setLanguage(languages[(languages.indexOf(language) + 1) % languages.length])
+  const cycleLanguage = () => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])
   const openStory = () => {
     setSurface('story')
     window.location.hash = 'whats-campus-loop'
@@ -586,7 +609,7 @@ function App() {
           {step === 2 ? <RentalStep rentalIds={rentalIds} setRentalIds={setRentalIds} bundle={bundle} setBundle={setBundle} language={language} t={t} back={() => go(1)} next={() => go(3)} /> : null}
           {step === 3 ? <BuyStep rentalIds={rentalIds} purchaseIds={purchaseIds} setPurchaseIds={setPurchaseIds} language={language} t={t} back={() => go(2)} next={() => go(4)} /> : null}
           {step === 4 ? <PickupStep profile={profile} pickup={pickup} setPickup={setPickup} rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} back={() => go(3)} next={() => go(5)} /> : null}
-          {step === 5 ? <ContactStep contact={contact} setContact={setContact} rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} back={() => go(4)} submit={submit} /> : null}
+          {step === 5 ? <ContactStep contact={contact} setContact={setContact} rentalIds={rentalIds} purchaseIds={purchaseIds} language={language} t={t} back={() => go(4)} submit={submit} submitting={submitting} submissionError={submissionError} /> : null}
           {step === 6 && reservation ? <Success reservation={reservation} language={language} t={t} onReset={reset} /> : null}
         </section>
 
