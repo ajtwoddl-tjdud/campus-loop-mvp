@@ -57,10 +57,10 @@ describe('Chung-Ang bedding pilot landing page', () => {
     expect(screen.getByText('This application is not a confirmed reservation or payment.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Change language' }))
-    expect(screen.getByText('이 신청은 예약 확정이나 결제가 아닙니다.')).toBeInTheDocument()
-    expect(screen.getAllByText('반납 후 ₩20,000 페이백').length).toBeGreaterThan(0)
+    expect(screen.getByText('この申請は予約確定や支払いではありません。')).toBeInTheDocument()
+    expect(screen.getAllByText('返却後 ₩20,000 キャッシュバック').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: '언어 변경' }))
+    await user.click(screen.getByRole('button', { name: '言語を変更' }))
     expect(screen.getByText('此申請並非已確認的預約或付款。')).toBeInTheDocument()
     expect(screen.getAllByText('歸還後退還 ₩20,000').length).toBeGreaterThan(0)
   })

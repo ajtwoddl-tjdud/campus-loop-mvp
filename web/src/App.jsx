@@ -7,7 +7,7 @@ import {
 import { createPilotApplication } from './api.js'
 import { copy } from './i18n.js'
 
-const languages = ['en', 'ko', 'zh']
+const languages = ['en', 'ja', 'zh']
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TURNSTILE_SITE_KEY = '0x4AAAAAAEUW9W3Ef9cHai7m'
 const TURNSTILE_SCRIPT_ID = 'campus-loop-turnstile-script'
