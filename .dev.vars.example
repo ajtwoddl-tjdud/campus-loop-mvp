@@ -1,0 +1,3 @@
+# Retrieve the campus-loop-pilot widget secret from Cloudflare Turnstile.
+TURNSTILE_SECRET=replace-with-local-secret
+TURNSTILE_HOSTNAMES=localhost,127.0.0.1

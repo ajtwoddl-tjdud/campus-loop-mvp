@@ -1,6 +1,42 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "campus-loop-mvp",
-  "pages_build_output_dir": "./web/dist",
-  "compatibility_date": "2026-07-20"
+  "main": "./worker/src/index.ts",
+  "compatibility_date": "2026-08-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "campusloop.attentionplease.build",
+      "custom_domain": true
+    }
+  ],
+  "assets": {
+    "directory": "./web/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "campus-loop",
+      "database_id": "e97fb3b5-d1ca-4a4c-ac55-c1ea75a87128",
+      "migrations_dir": "./worker/migrations"
+    }
+  ],
+  "vars": {
+    "TURNSTILE_HOSTNAMES": "campusloop.attentionplease.build"
+  },
+  "secrets": {
+    "required": ["TURNSTILE_SECRET"]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1
+    }
+  }
 }

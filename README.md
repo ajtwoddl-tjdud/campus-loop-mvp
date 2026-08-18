@@ -1,74 +1,69 @@
 # Campus Loop MVP
 
-NTU·NTNU 교환학생이 학교와 숙소에 맞는 한 학기 생활키트를 구성하고 수령 일정을 예약하는 고객용 MVP입니다.
+중앙대학교 교환학생이 입국 전 침구 렌탈 파일럿을 신청하는 고객용 MVP입니다. 신청은 예약이나 결제 확정이 아니며, 운영팀 확인 후 이용 가능 여부와 결제·수령 정보를 개별 안내합니다.
 
-**Live:** [campus-loop.pages.dev](https://campus-loop.pages.dev)
+**Live:** [campusloop.attentionplease.build](https://campusloop.attentionplease.build)
 
 ## 프로젝트 구조
 
 ```text
 campus-loop-mvp/
-├── web/  # React + Vite 고객 웹, Cloudflare Pages 배포 단위
-└── api/  # FastAPI API 골격
+├── web/                 # React + Vite SPA
+├── worker/              # Cloudflare Worker API, D1 migration, tests
+└── wrangler.jsonc       # Worker, assets, D1, custom domain configuration
 ```
 
-`VITE_API_BASE_URL`이 설정된 환경에서는 예약 확정 시 `web/`이 `api/`에 예약을 전송하고, FastAPI가 검증·가격 계산 후 SQLite에 저장합니다. 아직 API를 배포하지 않은 프로덕션 빌드는 기존처럼 브라우저 `localStorage`에만 저장합니다.
+React 빌드 결과와 Worker API를 하나의 Cloudflare Worker로 배포합니다. 신청서는 same-origin `POST /api/v1/pilot-applications`로 전송되며, Managed Turnstile 검증 후 D1에 저장됩니다.
 
-## Web 실행
+## 로컬 실행
+
+Node.js 22 이상과 Wrangler 4를 기준으로 합니다.
 
 ```bash
 npm install
-npm run dev:web
+cp .dev.vars.example .dev.vars
+npm run d1:migrate:local
+npm run dev
 ```
 
-프로덕션 빌드 및 Cloudflare Pages 직접 배포:
+`.dev.vars`의 `TURNSTILE_SECRET`에는 Cloudflare의 `campus-loop-pilot` 위젯 secret을 입력합니다. secret은 Git에 커밋하지 않습니다.
+
+## API
+
+- Health: `GET /api/v1/health`
+- 파일럿 신청: `POST /api/v1/pilot-applications`
+- 신청 성공: `201 { id, status: "received", createdAt }`
+
+신청 목록·상세 조회 API는 제공하지 않으며, API 응답과 로그에는 이름·이메일·Turnstile token을 남기지 않습니다.
+
+## 검증
 
 ```bash
-VITE_API_BASE_URL=https://your-api.example.com npm run build
-npm run preview:web
-npm run deploy:web
+npm test
+npm run lint:web
+npm run typecheck:worker
+npm run check:worker-types
+npm run build
+npm run d1:migrate:local
+npm run deploy:dry-run
+git diff --check
 ```
 
-정적 배포 산출물은 `web/dist/`입니다. Wrangler 4 실행에는 Node.js 22 이상이 필요합니다.
+Playwright 시각 검수는 자동 게이트에 포함하지 않습니다.
 
-## API 실행
-
-Python 3.12 이상과 [uv](https://docs.astral.sh/uv/)를 기준으로 합니다.
+## 배포
 
 ```bash
-cd api
-uv sync --dev
-uv run fastapi dev
+npm run d1:migrate:remote
+npm run deploy
 ```
 
-- Health check: `GET http://127.0.0.1:8000/api/v1/health`
-- 예약 생성: `POST http://127.0.0.1:8000/api/v1/reservations`
-- OpenAPI UI: `http://127.0.0.1:8000/docs`
-- 테스트: `uv run pytest`
-- 린트: `uv run ruff check .`
-
-로컬 웹은 기본적으로 `http://127.0.0.1:8000` API를 호출합니다. 프로덕션에서 서버 저장을 활성화할 때 `VITE_API_BASE_URL`을 설정합니다. 설정하지 않으면 브라우저 저장 모드로 유지됩니다. API에서 다른 웹 origin을 허용하려면 `api/.env.example`을 참고해 `CORS_ORIGINS`를 설정합니다.
+Worker 이름은 `campus-loop-mvp`, D1 데이터베이스 이름은 `campus-loop`입니다. 운영 도메인은 `campusloop.attentionplease.build`이며 `TURNSTILE_SECRET`은 Worker encrypted secret으로 별도 관리합니다.
 
 ## 구현 범위
 
-- NTU·NTNU, 숙소 유형, 체류 기간 및 대여 기간 선택
-- Lite·Core 추천 세트와 개별 대여품 커스텀 구성
-- 대여품과 새 제품을 분리한 실시간 주문 요약
-- 장기 체류 고객의 방학 중 보관 수요 확인
-- 캠퍼스 규정 안내와 수령·반납 일정 선택
-- 고객 연락처 검증 및 예약번호 생성
-- 브라우저 내 최근 예약 저장·복원
+- 중앙대학교 교환학생 여부, 거주 형태와 입출국 일정 확인
+- 시트·이불·베개·베개커버 단일 파일럿 구성과 KRW 가격·페이백 안내
 - 영어·한국어·번체중문 전환
-- 모바일·데스크톱 반응형 UI
-- 기존 예약 MVP에서 진입할 수 있는 `What's Campus Loop` 서비스 소개 화면
-
-예약은 기본적으로 `api/data/campus_loop.db`에 저장됩니다. 실제 결제, 관리자 인증, 이메일·LINE 발송은 아직 구현하지 않았으며, 인증 전까지 예약 목록·연락처 조회 API는 공개하지 않습니다.
-
-## 문서와 디자인
-
-- V2 디자인 기준: `design/campus-loop-v2-desktop-concept.png`, `design/campus-loop-v2-mobile-concept.png`
-- V2 QA 렌더: `design/campus-loop-v2-desktop-render.png`, `design/campus-loop-v2-mobile-render.png`
-- Stitch 소개 화면 기준: `design/campus-loop-stitch-reference.png`
-- Stitch QA 렌더: `design/campus-loop-stitch-mobile-render.png`
-- Stitch CTA QA 렌더: `design/campus-loop-stitch-cta-desktop-render.png`, `design/campus-loop-stitch-cta-mobile-render.png`
-- 모바일 빌더 UX 콘셉트·QA 렌더: `design/campus-loop-mobile-builder-ux-concept.png`, `design/campus-loop-mobile-builder-ux-render.png`
+- Managed Turnstile 검증과 D1 신청 저장
+- 결제·관리자 API·이메일 발송·자동 개인정보 삭제는 이번 범위에서 제외
