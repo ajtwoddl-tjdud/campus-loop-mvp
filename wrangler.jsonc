@@ -25,10 +25,18 @@
     }
   ],
   "vars": {
-    "TURNSTILE_HOSTNAMES": "campusloop.attentionplease.build"
+    "TURNSTILE_HOSTNAMES": "campusloop.attentionplease.build",
+    "PAYPAL_API_BASE": "https://api-m.paypal.com",
+    "PAYPAL_ENVIRONMENT": "production"
   },
   "secrets": {
-    "required": ["TURNSTILE_SECRET"]
+    "required": [
+      "TURNSTILE_SECRET",
+      "DISCORD_WEBHOOK_URL",
+      "PAYPAL_CLIENT_ID",
+      "PAYPAL_CLIENT_SECRET",
+      "PAYPAL_WEBHOOK_ID"
+    ]
   },
   "observability": {
     "enabled": true,

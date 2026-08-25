@@ -147,7 +147,7 @@ nav a:hover { color: var(--orange); }
   text-transform: uppercase;
 }
 .pilot-badge::before, .eyebrow::before { content: ''; display: inline-block; width: 26px; height: 1px; margin: 0 10px 3px 0; background: currentColor; }
-.hero-copy h1, .section-intro h2, .apply-copy h2, .success-panel h2 {
+.hero-copy h1, .section-intro h2, .success-panel h2 {
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
   letter-spacing: -.045em;
@@ -177,10 +177,10 @@ nav a:hover { color: var(--orange); }
 .text-link:hover { color: var(--orange); }
 .hero-note { margin: 31px 0 0; display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 12px; line-height: 1.5; }
 
-.included-section, .research-section, .how-section, .faq-section { padding: clamp(88px, 11vw, 160px) clamp(24px, 7vw, 110px); }
+.included-section, .research-section, .how-section, .faq-section, .contact-section { padding: clamp(88px, 11vw, 160px) clamp(24px, 7vw, 110px); }
 .section-intro { max-width: 760px; }
-.section-intro h2, .apply-copy h2 { margin: 0; font-size: clamp(40px, 5.5vw, 76px); line-height: 1.03; }
-.section-body, .apply-copy > p:not(.eyebrow) { max-width: 680px; margin: 25px 0 0; color: var(--ink-soft); font-size: 17px; line-height: 1.75; }
+.section-intro h2 { margin: 0; font-size: clamp(40px, 5.5vw, 76px); line-height: 1.03; }
+.section-body { max-width: 680px; margin: 25px 0 0; color: var(--ink-soft); font-size: 17px; line-height: 1.75; }
 
 .included-section { background: var(--paper); }
 .kit-layout { margin-top: 64px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr); gap: 24px; align-items: stretch; }
@@ -211,6 +211,12 @@ nav a:hover { color: var(--orange); }
 .price-panel > p:not(.eyebrow) { color: rgba(255, 255, 255, .72); line-height: 1.7; }
 .payback-line { margin: 39px 0 13px; padding-top: 27px; display: flex; align-items: center; gap: 11px; border-top: 1px solid rgba(255, 255, 255, .2); color: var(--yellow); font-size: 18px; }
 .price-panel small { color: rgba(255, 255, 255, .62); line-height: 1.55; }
+.reference-rate { margin: 20px 0 0; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .2); font-size: 11px; }
+.paypal-checkout { margin-top: 30px; padding-top: 26px; border-top: 1px solid rgba(255, 255, 255, .2); }
+.paypal-checkout > p:first-child { margin: 0 0 14px; color: rgba(255, 255, 255, .72); font-size: 12px; line-height: 1.5; }
+.paypal-checkout > div { min-height: 45px; }
+.paypal-error { margin: 12px 0 0; padding: 12px; color: #8a2d20; background: #ffe7df; font-size: 12px; font-weight: 700; line-height: 1.5; }
+.paypal-processing { margin: 12px 0 0; color: var(--forest); font-size: 12px; font-weight: 700; }
 
 .research-section { position: relative; overflow: hidden; background: var(--paper-deep); }
 .research-section::after { content: '14'; position: absolute; right: -15px; top: 10px; color: rgba(23, 51, 45, .05); font: 600 clamp(180px, 28vw, 420px)/1 'Fraunces', Georgia, serif; }
@@ -238,12 +244,8 @@ nav a:hover { color: var(--orange); }
 .boundary-note h3 { margin: 0 0 7px; font-size: 16px; }
 .boundary-note p { margin: 0; color: rgba(255, 255, 255, .75); font-size: 14px; line-height: 1.65; }
 
-.apply-section { display: grid; grid-template-columns: minmax(300px, .72fr) minmax(520px, 1.28fr); background: var(--mint); }
-.apply-copy { padding: clamp(74px, 9vw, 130px) clamp(24px, 7vw, 110px); }
-.apply-price { margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(23, 51, 45, .25); display: grid; gap: 7px; }
-.apply-price span { font: 600 42px/1 'Fraunces', Georgia, serif; }
-.apply-price strong { color: var(--forest); font-size: 14px; }
-.application-form, .success-panel { padding: clamp(52px, 8vw, 110px) clamp(24px, 7vw, 100px); background: var(--paper); }
+.apply-section { background: var(--paper); }
+.application-form, .success-panel { width: min(100%, 900px); margin: 0 auto; padding: clamp(52px, 8vw, 110px) clamp(24px, 7vw, 100px); background: var(--paper); }
 .application-form fieldset { margin: 31px 0 0; padding: 0; border: 0; }
 .application-form legend, .field-grid label { font-size: 13px; font-weight: 700; }
 .check-row { display: flex; gap: 13px; align-items: flex-start; cursor: pointer; color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
@@ -257,6 +259,7 @@ nav a:hover { color: var(--orange); }
 .radio-row input:focus-visible + span { outline: 3px solid var(--orange); outline-offset: 3px; }
 .field-grid { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 16px; }
 .field-grid label { display: grid; gap: 9px; }
+.field-grid .field-wide { grid-column: 1 / -1; }
 .field-grid input { width: 100%; min-height: 52px; padding: 0 14px; color: var(--ink); border: 1px solid var(--line); border-radius: 0; background: #fff; }
 .field-grid input:hover { border-color: rgba(23, 51, 45, .45); }
 .consent-row { margin-top: 28px; }
@@ -270,10 +273,10 @@ nav a:hover { color: var(--orange); }
 .success-mark { width: 62px; height: 62px; display: grid; place-items: center; color: white; background: var(--forest); border-radius: 50%; box-shadow: 8px 8px 0 var(--yellow); }
 .success-panel h2 { margin: 37px 0 16px; font-size: clamp(42px, 5vw, 70px); }
 .success-panel > p { max-width: 660px; margin: 0; color: var(--ink-soft); line-height: 1.75; }
-.success-panel dl { margin: 35px 0 12px; }
-.success-panel dt { color: var(--ink-soft); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
-.success-panel dd { margin: 7px 0 0; font-size: 18px; font-weight: 700; }
-.success-panel small { color: var(--ink-soft); }
+.success-panel .checkout-price { margin-top: 25px; color: var(--forest); font-size: 15px; font-weight: 800; }
+.success-panel .paypal-checkout { width: min(100%, 520px); margin-top: 8px; border-top-color: var(--line); }
+.success-panel .paypal-checkout > p:first-child { color: var(--ink-soft); }
+.success-panel .payment-confirmed { margin-top: 28px; display: inline-flex; align-items: center; gap: 9px; padding: 13px 16px; color: var(--forest); background: var(--sage); font-weight: 800; }
 
 .faq-section { background: var(--paper); }
 .faq-list { max-width: 900px; margin: 60px 0 0 auto; border-top: 1px solid var(--line); }
@@ -284,6 +287,14 @@ nav a:hover { color: var(--orange); }
 .faq-list details[open] summary::after { content: '−'; }
 .faq-list summary span { color: var(--orange); font: 500 20px/1 'Fraunces', Georgia, serif; }
 .faq-list details p { max-width: 680px; margin: -5px 0 28px 54px; color: var(--ink-soft); line-height: 1.7; }
+
+.contact-section { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 50px; align-items: end; color: white; background: var(--forest); }
+.contact-section h2 { max-width: 760px; margin: 0; font: 600 clamp(40px, 5.5vw, 76px)/1.03 'Fraunces', Georgia, serif; letter-spacing: -.045em; }
+.contact-section > div > p:not(.eyebrow) { max-width: 680px; margin: 24px 0 0; color: rgba(255, 255, 255, .72); line-height: 1.7; }
+.contact-section .eyebrow { color: var(--yellow); }
+.contact-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.contact-links .button-primary { color: var(--forest-dark); background: var(--yellow); box-shadow: 8px 8px 0 var(--orange); }
+.contact-links .text-link { display: inline-flex; align-items: center; gap: 7px; color: white; }
 
 footer { min-height: 170px; padding: 40px clamp(24px, 7vw, 110px); display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; color: white; background: var(--forest-dark); }
 footer .logo { color: white; }
@@ -301,7 +312,7 @@ footer p { margin: 0; color: rgba(255, 255, 255, .58); font-size: 12px; }
   .pilot-hero { grid-template-columns: 1fr 1fr; }
   .hero-copy { padding-inline: 42px; }
   .hero-copy h1 { font-size: 58px; }
-  .kit-layout, .apply-section { grid-template-columns: 1fr; }
+  .kit-layout { grid-template-columns: 1fr; }
   .stat-strip { grid-template-columns: 1fr 1fr; }
   .stat-strip > p { grid-column: 1 / -1; }
   .application-form, .success-panel { padding-inline: clamp(24px, 10vw, 110px); }
@@ -319,9 +330,9 @@ footer p { margin: 0; color: rgba(255, 255, 255, .58); font-size: 12px; }
   .button { min-height: 54px; }
   .hero-note { margin-top: 27px; }
   .hero-image-wrap { min-height: 420px; }
-  .included-section, .research-section, .how-section, .faq-section { padding: 82px 22px; }
-  .section-intro h2, .apply-copy h2 { font-size: clamp(39px, 12vw, 56px); }
-  .section-body, .apply-copy > p:not(.eyebrow) { font-size: 15px; }
+  .included-section, .research-section, .how-section, .faq-section, .contact-section { padding: 82px 22px; }
+  .section-intro h2 { font-size: clamp(39px, 12vw, 56px); }
+  .section-body { font-size: 15px; }
   .kit-layout { margin-top: 44px; }
   .kit-sheet { min-height: 0; grid-template-rows: 260px auto; }
   .kit-copy { padding: 30px 24px; grid-template-columns: 1fr; }
@@ -340,12 +351,13 @@ footer p { margin: 0; color: rgba(255, 255, 255, .58); font-size: 12px; }
   .process-list li > svg { display: none; }
   .process-index { font-size: 24px; }
   .boundary-note { padding: 23px 20px; }
-  .apply-copy { padding: 76px 22px 54px; }
   .application-form, .success-panel { padding: 52px 22px 68px; }
   .field-grid, .radio-row { grid-template-columns: 1fr; }
   .faq-list { margin-top: 42px; }
   .faq-list summary { min-height: 76px; gap: 14px; font-size: 15px; }
   .faq-list details p { margin-left: 38px; font-size: 14px; }
+  .contact-section { grid-template-columns: 1fr; align-items: start; }
+  .contact-links { align-items: flex-start; flex-direction: column; }
   footer { min-height: 150px; align-items: flex-start; flex-direction: column; justify-content: flex-end; }
 }
 

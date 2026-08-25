@@ -1,3 +1,9 @@
 # Retrieve the campus-loop-pilot widget secret from Cloudflare Turnstile.
 TURNSTILE_SECRET=replace-with-local-secret
 TURNSTILE_HOSTNAMES=localhost,127.0.0.1
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/replace-me/replace-me
+PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+PAYPAL_ENVIRONMENT=sandbox
+PAYPAL_CLIENT_ID=replace-with-sandbox-client-id
+PAYPAL_CLIENT_SECRET=replace-with-sandbox-client-secret
+PAYPAL_WEBHOOK_ID=replace-with-sandbox-webhook-id

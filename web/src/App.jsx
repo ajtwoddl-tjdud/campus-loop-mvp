@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
 import {
   ArrowRight, BedDouble, CalendarDays, Check, ChevronDown, Mail,
   MapPin, RotateCcw, ShieldCheck, Sparkles,
 } from 'lucide-react'
 
-import { createPilotApplication } from './api.js'
+import { capturePayPalOrder, createPayPalOrder, createRentalIntake } from './api.js'
 import { copy } from './i18n.js'
 
 const languages = ['en', 'ja', 'zh']
@@ -12,12 +13,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TURNSTILE_SITE_KEY = '0x4AAAAAAEUW9W3Ef9cHai7m'
 const TURNSTILE_SCRIPT_ID = 'campus-loop-turnstile-script'
 const EMPTY_FORM = {
-  isChungAngExchangeStudent: false,
-  housing: '',
-  arrivalDate: '',
-  departureDate: '',
   name: '',
   email: '',
+  secondaryContact: '',
   agree: false,
 }
 
@@ -56,19 +54,68 @@ function SectionIntro({ eyebrow, title, body }) {
   )
 }
 
+function PayPalCheckout({ t, intake, onCompleted }) {
+  const [error, setError] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const options = useMemo(() => ({
+    clientId: intake.paypal.clientId,
+    currency: 'USD',
+    intent: 'capture',
+    components: 'buttons',
+    disableFunding: 'venmo',
+  }), [intake.paypal.clientId])
+
+  return (
+    <div className="paypal-checkout">
+      <p>{t.paymentMethods}</p>
+      <PayPalScriptProvider options={options}>
+        <div aria-label={t.paymentLabel}>
+          <PayPalButtons
+            disabled={processing}
+            forceReRender={[intake.id]}
+            style={{ layout: 'vertical', shape: 'rect', height: 45, label: 'paypal' }}
+            createOrder={async () => {
+              setError('')
+              const result = await createPayPalOrder(intake)
+              return result.orderId
+            }}
+            onApprove={async (data) => {
+              setProcessing(true)
+              setError('')
+              try {
+                const result = await capturePayPalOrder(intake, data.orderID)
+                if (result.status !== 'COMPLETED') throw new Error('Payment was not completed')
+                onCompleted()
+              } catch {
+                setError(t.paymentError)
+              } finally {
+                setProcessing(false)
+              }
+            }}
+            onCancel={() => setError(t.paymentCancelled)}
+            onError={() => setError(t.paymentError)}
+          />
+        </div>
+      </PayPalScriptProvider>
+      {processing ? <p className="paypal-processing" role="status">{t.paymentProcessing}</p> : null}
+      {error ? <p className="paypal-error" role="alert">{error}</p> : null}
+    </div>
+  )
+}
+
 function Hero({ t }) {
   return (
     <section className="pilot-hero">
       <div className="hero-image-wrap">
-        <img src="/assets/campus-loop-hero-cau.png" alt={t.imageAlt} fetchPriority="high" decoding="async" />
+        <img src="/assets/campus-loop-hero-cau.png" alt={t.imageAlt} decoding="async" />
         <span className="image-caption"><Sparkles size={15} />{t.imageCaption}</span>
       </div>
       <div className="hero-copy">
-        <p className="pilot-badge">{t.pilotBadge}</p>
+        <p className="pilot-badge">{t.serviceBadge}</p>
         <h1>{t.hero}</h1>
         <p className="hero-body">{t.heroBody}</p>
         <div className="hero-actions">
-          <a className="button button-primary" href="#apply">{t.apply}<ArrowRight size={18} /></a>
+          <a className="button button-primary" href="#checkout">{t.apply}<ArrowRight size={18} /></a>
           <a className="text-link" href="#included">{t.seeIncluded}</a>
         </div>
         <p className="hero-note"><ShieldCheck size={17} />{t.heroNote}</p>
@@ -101,6 +148,7 @@ function Included({ t }) {
           <p>{t.priceBody}</p>
           <div className="payback-line"><RotateCcw size={20} /><strong>{t.payback}</strong></div>
           <small>{t.paybackNote}</small>
+          <p className="reference-rate">{t.referenceRate}</p>
         </aside>
       </div>
     </section>
@@ -166,7 +214,7 @@ function TurnstileWidget({ onToken, onError, resetHandle, t }) {
       if (!active || !containerRef.current || !window.turnstile) return
       widgetId = window.turnstile.render(containerRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
-        action: 'pilot_application',
+        action: 'rental_intake',
         appearance: 'interaction-only',
         execution: 'render',
         size: 'flexible',
@@ -220,23 +268,22 @@ function TurnstileWidget({ onToken, onError, resetHandle, t }) {
   )
 }
 
-function ApplicationForm({ t }) {
+function RentalIntakeForm({ t }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [application, setApplication] = useState(null)
+  const [intake, setIntake] = useState(null)
+  const [paymentCompleted, setPaymentCompleted] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const turnstileReset = useRef(null)
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
   const validate = () => {
-    if (!form.isChungAngExchangeStudent || !form.housing || !form.arrivalDate ||
-        !form.departureDate || !form.name.trim() || !form.email.trim() || !form.agree) {
+    if (!form.name.trim() || !form.email.trim() || !form.agree) {
       return t.formError
     }
     if (!EMAIL_PATTERN.test(form.email)) return t.emailError
-    if (form.departureDate <= form.arrivalDate) return t.dateError
     if (!turnstileToken) return t.turnstileRequired
     return ''
   }
@@ -252,15 +299,16 @@ function ApplicationForm({ t }) {
     setError('')
     setSubmitting(true)
     try {
-      const response = await createPilotApplication({
-        ...form,
+      const response = await createRentalIntake({
         name: form.name.trim(),
         email: form.email.trim(),
+        secondaryContact: form.secondaryContact.trim(),
+        agree: form.agree,
         turnstileToken,
       })
-      setApplication(response)
+      setIntake(response)
       window.dispatchEvent(new CustomEvent('campus-loop:event', {
-        detail: { name: 'pilot_application_submitted', housing: form.housing },
+        detail: { name: 'rental_intake_submitted' },
       }))
     } catch {
       setError(t.submitError)
@@ -271,41 +319,27 @@ function ApplicationForm({ t }) {
   }
 
   return (
-    <section className="apply-section" id="apply">
-      <div className="apply-copy">
-        <p className="eyebrow">{t.applyEyebrow}</p>
-        <h2>{t.applyTitle}</h2>
-        <p>{t.applyBody}</p>
-        <div className="apply-price"><span>{t.price}</span><strong>{t.payback}</strong></div>
-      </div>
-      {application ? (
+    <section className="apply-section" id="checkout">
+      {intake ? (
         <div className="success-panel" role="status">
           <span className="success-mark"><Check size={28} /></span>
-          <h2>{t.successTitle}</h2>
-          <p>{t.successBody}</p>
-          <dl><dt>{t.applicationId}</dt><dd>{application.id}</dd></dl>
-          <small>{t.successNext}</small>
+          <h2>{paymentCompleted ? t.paymentSuccessTitle : t.successTitle}</h2>
+          <p>{paymentCompleted ? t.paymentSuccessBody : t.successBody}</p>
+          {paymentCompleted ? (
+            <p className="payment-confirmed"><Check size={18} />{t.paymentConfirmed}</p>
+          ) : (
+            <>
+              <p className="checkout-price">{t.checkoutPrice}</p>
+              <PayPalCheckout t={t} intake={intake} onCompleted={() => setPaymentCompleted(true)} />
+            </>
+          )}
         </div>
       ) : (
         <form className="application-form" onSubmit={submit} noValidate>
-          <label className="check-row emphasized">
-            <input type="checkbox" checked={form.isChungAngExchangeStudent} onChange={(event) => update('isChungAngExchangeStudent', event.target.checked)} />
-            <span>{t.exchangeStudent}</span>
-          </label>
-
-          <fieldset>
-            <legend>{t.housingLegend}</legend>
-            <div className="radio-row">
-              <label><input type="radio" name="housing" value="dorm" checked={form.housing === 'dorm'} onChange={(event) => update('housing', event.target.value)} /><span>{t.dorm}</span></label>
-              <label><input type="radio" name="housing" value="off" checked={form.housing === 'off'} onChange={(event) => update('housing', event.target.value)} /><span>{t.off}</span></label>
-            </div>
-          </fieldset>
-
           <div className="field-grid">
-            <label>{t.arrival}<input type="date" value={form.arrivalDate} onChange={(event) => update('arrivalDate', event.target.value)} /></label>
-            <label>{t.departure}<input type="date" value={form.departureDate} onChange={(event) => update('departureDate', event.target.value)} /></label>
             <label>{t.name}<input type="text" autoComplete="name" value={form.name} onChange={(event) => update('name', event.target.value)} /></label>
             <label>{t.email}<input type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
+            <label className="field-wide">{t.secondaryContact}<input type="text" autoComplete="off" placeholder={t.secondaryPlaceholder} value={form.secondaryContact} onChange={(event) => update('secondaryContact', event.target.value)} /></label>
           </div>
 
           <label className="check-row consent-row">
@@ -318,13 +352,29 @@ function ApplicationForm({ t }) {
             resetHandle={turnstileReset}
             t={t}
           />
-          <p className="non-confirmation"><ShieldCheck size={16} />{t.nonConfirmation}</p>
+          <p className="non-confirmation"><ShieldCheck size={16} />{t.noChargeYet}</p>
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <button className="button button-primary submit-button" type="submit" disabled={submitting}>
             {submitting ? t.submitting : t.submit}<ArrowRight size={18} />
           </button>
         </form>
       )}
+    </section>
+  )
+}
+
+function Contact({ t }) {
+  return (
+    <section className="contact-section" id="contact">
+      <div>
+        <p className="eyebrow">{t.contactEyebrow}</p>
+        <h2>{t.contactTitle}</h2>
+        <p>{t.contactBody}</p>
+      </div>
+      <div className="contact-links">
+        <a className="button button-primary" href="mailto:nvpz1598@gmail.com">{t.contactEmail}<Mail size={18} /></a>
+        <a className="text-link" href="https://www.instagram.com/campusloop.for.u" target="_blank" rel="noreferrer">{t.contactInstagram}<ArrowRight size={16} /></a>
+      </div>
     </section>
   )
 }
@@ -365,8 +415,9 @@ function App() {
         <Included t={t} />
         <Research t={t} />
         <HowItWorks t={t} />
-        <ApplicationForm t={t} />
+        <RentalIntakeForm t={t} />
         <Faq t={t} />
+        <Contact t={t} />
       </main>
       <footer><Logo /><p>{t.footer}</p></footer>
     </div>
