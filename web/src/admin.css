@@ -48,13 +48,14 @@
 .admin-env { padding: 6px 9px; border: 1px solid #9caaa1; color: #48635c; font: 500 10px "DM Mono", monospace !important; letter-spacing: .08em; text-transform: uppercase; }
 .admin-env--production { border-color: #d18b7a; color: #a22618; background: #fff0ea; }
 .admin-env--sandbox { border-color: #6d9d7d; color: #24603c; background: #e6f0e6; }
-.admin-paypal-test__grid { display: grid; grid-template-columns: minmax(320px, 460px) 1fr; }
-.admin-paypal-test__checkout { display: grid; gap: 16px; align-content: start; padding: 24px; border-right: 1px solid #c4cdc5; }
+.admin-paypal-test__grid { display: grid; grid-template-columns: 1fr; }
+.admin-paypal-test__checkout { display: grid; gap: 16px; align-content: start; padding: 24px; border-bottom: 1px solid #c4cdc5; }
 .admin-paypal-test__checkout > svg { width: 24px; height: 24px; color: #bd4d24; }
 .admin-paypal-test__checkout h3, .admin-paypal-test__history h3 { margin: 0 0 6px; font-size: 18px; }
 .admin-paypal-test__checkout p { margin: 0; color: #60736e; font-size: 12px; line-height: 1.6; }
 .admin-paypal-test__checkout .admin-warning { color: #765025; }
 .admin-paypal-test__checkout > div[aria-label], .admin-paypal-test__checkout > div { min-width: 0; }
+.admin-paypal-test__button { width: min(100%, 520px); min-height: 42px; }
 .admin-paypal-test__status, .admin-paypal-test__success { padding: 10px 12px; border: 1px solid #9caaa1; }
 .admin-paypal-test__success { color: #24603c !important; background: #e6f0e6; border-color: #6d9d7d; font-family: "DM Mono", monospace; overflow-wrap: anywhere; }
 .admin-paypal-test__history { min-width: 0; padding: 24px; }
@@ -112,8 +113,6 @@
   .admin-filters { grid-template-columns: 1fr 1fr; }
   .admin-search { grid-column: 1 / -1; }
   .admin-filters .admin-button { grid-column: 2; }
-  .admin-paypal-test__grid { grid-template-columns: 1fr; }
-  .admin-paypal-test__checkout { border-right: 0; border-bottom: 1px solid #c4cdc5; }
 }
 @media (max-width: 680px) {
   .admin-shell { width: min(100% - 24px, 1520px); padding-top: 20px; }

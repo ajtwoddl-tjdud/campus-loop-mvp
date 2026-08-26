@@ -128,7 +128,7 @@ function PayPalTestPanel({ session }) {
     currency: 'USD',
     intent: 'capture',
     components: 'buttons',
-    disableFunding: 'venmo',
+    disableFunding: 'venmo,card',
   } : null, [config])
 
   return (
@@ -140,37 +140,38 @@ function PayPalTestPanel({ session }) {
       <div className="admin-paypal-test__grid">
         <div className="admin-paypal-test__checkout">
           <CreditCard />
-          <div><h3>$1.00 USD</h3><p>실제 PayPal 주문·승인·캡처 경로를 검증합니다. 침구 신청 데이터는 생성되지 않습니다.</p></div>
+          <div><h3>$1.00 USD</h3><p>PayPal 지갑으로 실제 주문·승인·캡처 경로를 검증합니다. 침구 신청 데이터와 카드 청구 주소는 생성되지 않습니다.</p></div>
           {config?.environment === 'production' && <p className="admin-warning"><b>LIVE 결제입니다.</b> 버튼을 완료하면 실제로 $1가 청구되고 PayPal 수수료가 발생할 수 있습니다.</p>}
-          {options && <PayPalScriptProvider options={options}>
-            <PayPalButtons
-              disabled={processing}
-              style={{ layout: 'vertical', shape: 'rect', height: 42, label: 'paypal' }}
-              createOrder={async () => {
-                setError('')
-                setMessage('')
-                const result = await adminApi.createPayPalTestOrder(session.csrfToken)
-                return result.orderId
-              }}
-              onApprove={async (data) => {
-                setProcessing(true)
-                setError('')
-                setMessage('')
-                try {
-                  const result = await adminApi.capturePayPalTestOrder(data.orderID, session.csrfToken)
-                  if (result.status !== 'COMPLETED') throw new Error('Payment was not completed')
-                  setMessage(`결제 완료 · ${result.orderId}`)
-                  await load()
-                } catch (nextError) {
-                  setError(nextError.message || '결제 완료 상태를 확인하지 못했습니다.')
-                } finally {
-                  setProcessing(false)
-                }
-              }}
-              onCancel={() => setError('PayPal 결제가 취소되었습니다.')}
-              onError={() => setError('PayPal 결제를 처리하지 못했습니다.')}
-            />
-          </PayPalScriptProvider>}
+          {options && <div className="admin-paypal-test__button"><PayPalScriptProvider options={options}>
+              <PayPalButtons
+                fundingSource="paypal"
+                disabled={processing}
+                style={{ layout: 'vertical', shape: 'rect', height: 42, label: 'paypal' }}
+                createOrder={async () => {
+                  setError('')
+                  setMessage('')
+                  const result = await adminApi.createPayPalTestOrder(session.csrfToken)
+                  return result.orderId
+                }}
+                onApprove={async (data) => {
+                  setProcessing(true)
+                  setError('')
+                  setMessage('')
+                  try {
+                    const result = await adminApi.capturePayPalTestOrder(data.orderID, session.csrfToken)
+                    if (result.status !== 'COMPLETED') throw new Error('Payment was not completed')
+                    setMessage(`결제 완료 · ${result.orderId}`)
+                    await load()
+                  } catch (nextError) {
+                    setError(nextError.message || '결제 완료 상태를 확인하지 못했습니다.')
+                  } finally {
+                    setProcessing(false)
+                  }
+                }}
+                onCancel={() => setError('PayPal 결제가 취소되었습니다.')}
+                onError={() => setError('PayPal 결제를 처리하지 못했습니다.')}
+              />
+          </PayPalScriptProvider></div>}
           {processing && <p className="admin-paypal-test__status" role="status">PayPal 결제 완료 상태를 확인하고 있습니다…</p>}
           {message && <p className="admin-paypal-test__success" role="status">{message}</p>}
           {error && <p className="admin-error" role="alert">{error}</p>}

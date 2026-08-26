@@ -5,8 +5,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import AdminApp from './AdminApp.jsx'
 
 vi.mock('@paypal/react-paypal-js', () => ({
-  PayPalScriptProvider: ({ children }) => children,
-  PayPalButtons: ({ createOrder, onApprove, disabled }) => <button disabled={disabled} onClick={async () => {
+  PayPalScriptProvider: ({ children, options }) => <div data-testid="paypal-provider" data-disable-funding={options.disableFunding}>{children}</div>,
+  PayPalButtons: ({ createOrder, onApprove, disabled, fundingSource }) => <button data-funding-source={fundingSource} disabled={disabled} onClick={async () => {
     const orderID = await createOrder()
     await onApprove({ orderID })
   }}>PayPal $1 테스트 결제</button>,
@@ -71,6 +71,8 @@ describe('Admin backoffice', () => {
     expect(await screen.findByText('Campus Student')).toBeInTheDocument()
     expect(screen.getByText('student@example.com')).toBeInTheDocument()
     expect(await screen.findByText('LIVE 결제입니다.')).toBeInTheDocument()
+    expect(screen.getByTestId('paypal-provider')).toHaveAttribute('data-disable-funding', 'venmo,card')
+    expect(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' })).toHaveAttribute('data-funding-source', 'paypal')
     await user.click(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' }))
     expect(await screen.findByText('결제 완료 · 9AB12345CD678901E')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/admin/paypal/test-orders', expect.objectContaining({
