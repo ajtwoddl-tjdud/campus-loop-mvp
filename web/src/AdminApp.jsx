@@ -128,7 +128,7 @@ function PayPalTestPanel({ session }) {
     currency: 'USD',
     intent: 'capture',
     components: 'buttons',
-    disableFunding: 'venmo,card',
+    disableFunding: 'venmo',
   } : null, [config])
 
   return (
@@ -140,11 +140,10 @@ function PayPalTestPanel({ session }) {
       <div className="admin-paypal-test__grid">
         <div className="admin-paypal-test__checkout">
           <CreditCard />
-          <div><h3>$1.00 USD</h3><p>PayPal 지갑으로 실제 주문·승인·캡처 경로를 검증합니다. 침구 신청 데이터와 카드 청구 주소는 생성되지 않습니다.</p></div>
+          <div><h3>$1.00 USD</h3><p>PayPal 지갑 또는 카드로 실제 주문·승인·캡처 경로를 검증합니다. 카드 결제는 PayPal 로그인 없이 진행할 수 있으며, PayPal이 카드사 확인을 위해 청구 주소나 우편번호를 요청할 수 있습니다. 침구 신청 데이터는 생성되지 않습니다.</p></div>
           {config?.environment === 'production' && <p className="admin-warning"><b>LIVE 결제입니다.</b> 버튼을 완료하면 실제로 $1가 청구되고 PayPal 수수료가 발생할 수 있습니다.</p>}
           {options && <div className="admin-paypal-test__button"><PayPalScriptProvider options={options}>
               <PayPalButtons
-                fundingSource="paypal"
                 disabled={processing}
                 style={{ layout: 'vertical', shape: 'rect', height: 42, label: 'paypal' }}
                 createOrder={async () => {

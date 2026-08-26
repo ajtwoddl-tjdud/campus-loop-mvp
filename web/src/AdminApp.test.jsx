@@ -71,8 +71,8 @@ describe('Admin backoffice', () => {
     expect(await screen.findByText('Campus Student')).toBeInTheDocument()
     expect(screen.getByText('student@example.com')).toBeInTheDocument()
     expect(await screen.findByText('LIVE 결제입니다.')).toBeInTheDocument()
-    expect(screen.getByTestId('paypal-provider')).toHaveAttribute('data-disable-funding', 'venmo,card')
-    expect(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' })).toHaveAttribute('data-funding-source', 'paypal')
+    expect(screen.getByTestId('paypal-provider')).toHaveAttribute('data-disable-funding', 'venmo')
+    expect(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' })).not.toHaveAttribute('data-funding-source')
     await user.click(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' }))
     expect(await screen.findByText('결제 완료 · 9AB12345CD678901E')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/admin/paypal/test-orders', expect.objectContaining({
