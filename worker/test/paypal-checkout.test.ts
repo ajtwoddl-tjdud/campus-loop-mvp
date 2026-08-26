@@ -102,7 +102,19 @@ describe('PayPal Checkout API', () => {
     expect(paypalPayload.purchase_units[0]).toMatchObject({
       custom_id: intake.id,
       invoice_id: intake.id,
-      amount: { currency_code: 'USD', value: '49.99' },
+      amount: {
+        currency_code: 'USD',
+        value: '49.99',
+        breakdown: { item_total: { currency_code: 'USD', value: '49.99' } },
+      },
+      items: [{
+        name: 'Campus Loop Essential Bedding Set',
+        quantity: '1',
+        category: 'PHYSICAL_GOODS',
+        unit_amount: { currency_code: 'USD', value: '49.99' },
+        image_url: 'https://campusloop.attentionplease.build/assets/campus-loop-checkout.jpg',
+        url: 'https://campusloop.attentionplease.build/',
+      }],
     })
     expect(paypalPayload.application_context.shipping_preference).toBe('NO_SHIPPING')
 

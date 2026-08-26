@@ -7,3 +7,6 @@ PAYPAL_ENVIRONMENT=sandbox
 PAYPAL_CLIENT_ID=replace-with-sandbox-client-id
 PAYPAL_CLIENT_SECRET=replace-with-sandbox-client-secret
 PAYPAL_WEBHOOK_ID=replace-with-sandbox-webhook-id
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=pbkdf2-sha256$100000$replace-with-base64url-salt$replace-with-base64url-hash
+ADMIN_SESSION_SECRET=replace-with-at-least-32-random-bytes
