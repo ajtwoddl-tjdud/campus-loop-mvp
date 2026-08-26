@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import AdminApp from './AdminApp.jsx'
 
 vi.mock('@paypal/react-paypal-js', () => ({
-  PayPalScriptProvider: ({ children, options }) => <div data-testid="paypal-provider" data-disable-funding={options.disableFunding}>{children}</div>,
+  PayPalScriptProvider: ({ children, options }) => <div data-testid="paypal-provider" data-disable-funding={options.disableFunding} data-csp-nonce={options.dataCspNonce}>{children}</div>,
   PayPalButtons: ({ createOrder, onApprove, disabled, fundingSource }) => <button data-funding-source={fundingSource} disabled={disabled} onClick={async () => {
     const orderID = await createOrder()
     await onApprove({ orderID })
@@ -36,6 +36,7 @@ function json(data, status = 200, headers = {}) {
 afterEach(() => {
   vi.unstubAllGlobals()
   document.body.className = ''
+  document.querySelector('meta[name="csp-nonce"]')?.remove()
 })
 
 describe('Admin backoffice', () => {
@@ -49,6 +50,10 @@ describe('Admin backoffice', () => {
   })
 
   test('loads operations data and saves an audited status edit with CSRF', async () => {
+    const cspMeta = document.createElement('meta')
+    cspMeta.name = 'csp-nonce'
+    cspMeta.content = 'test-csp-nonce'
+    document.head.append(cspMeta)
     const fetchMock = vi.fn(async (url, options = {}) => {
       if (url === '/api/v1/admin/session') return json({ authenticated: true, username: 'admin', csrfToken: 'csrf-token', expiresAt: 9999999999 })
       if (url === '/api/v1/admin/overview') return json({ total: 1, paid: 0, ready: 0, collected: 0, returned: 0, refundsPending: 0, refundsCompleted: 0 })
@@ -72,6 +77,7 @@ describe('Admin backoffice', () => {
     expect(screen.getByText('student@example.com')).toBeInTheDocument()
     expect(await screen.findByText('LIVE 결제입니다.')).toBeInTheDocument()
     expect(screen.getByTestId('paypal-provider')).toHaveAttribute('data-disable-funding', 'venmo')
+    expect(screen.getByTestId('paypal-provider')).toHaveAttribute('data-csp-nonce', 'test-csp-nonce')
     expect(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' })).not.toHaveAttribute('data-funding-source')
     await user.click(screen.getByRole('button', { name: 'PayPal $1 테스트 결제' }))
     expect(await screen.findByText('결제 완료 · 9AB12345CD678901E')).toBeInTheDocument()

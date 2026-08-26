@@ -3,7 +3,7 @@ import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, test } from 'vitest'
 import { vi } from 'vitest'
 
-import worker from '../src/index'
+import worker, { adminPageResponse } from '../src/index'
 
 const ORIGIN = 'https://campusloop.attentionplease.build'
 const INTAKE_ID = 'CLR-123456789ABC'
@@ -44,6 +44,19 @@ async function authenticated() {
 }
 
 describe('Admin backoffice API', () => {
+  test('serves a matching CSP nonce to the admin page and PayPal SDK', async () => {
+    const response = adminPageResponse(new Response('<!doctype html><html><head></head><body></body></html>', {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    }))
+    const html = await response.text()
+    const nonce = html.match(/<meta name="csp-nonce" content="([^"]+)">/)?.[1]
+
+    expect(nonce).toBeTruthy()
+    expect(response.headers.get('content-security-policy')).toContain(`script-src 'self' https://www.paypal.com https://www.paypalobjects.com 'nonce-${nonce}'`)
+    expect(response.headers.get('content-security-policy')).toContain(`style-src 'self' https://fonts.googleapis.com https://*.paypal.com https://www.paypalobjects.com 'nonce-${nonce}'`)
+    expect(response.headers.get('content-security-policy')).not.toContain("'unsafe-inline'")
+  })
+
   test('requires authentication for operational data', async () => {
     const session = await request('/api/v1/admin/session')
     const intakes = await request('/api/v1/admin/intakes')

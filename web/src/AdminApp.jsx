@@ -129,6 +129,7 @@ function PayPalTestPanel({ session }) {
     intent: 'capture',
     components: 'buttons',
     disableFunding: 'venmo',
+    dataCspNonce: document.querySelector('meta[name="csp-nonce"]')?.content,
   } : null, [config])
 
   return (

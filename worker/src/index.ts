@@ -404,7 +404,10 @@ function adminApiResponse(response: Response): Response {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
 }
 
-function adminPageResponse(response: Response): Response {
+export function adminPageResponse(response: Response): Response {
+  const nonceBytes = new Uint8Array(24)
+  crypto.getRandomValues(nonceBytes)
+  const cspNonce = encodeBase64Url(nonceBytes)
   const headers = new Headers(response.headers)
   headers.set('Cache-Control', 'no-store')
   headers.set('X-Content-Type-Options', 'nosniff')
@@ -413,8 +416,8 @@ function adminPageResponse(response: Response): Response {
   headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
   headers.set('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' https://www.paypal.com https://www.paypalobjects.com",
-    "style-src 'self' https://fonts.googleapis.com",
+    `script-src 'self' https://www.paypal.com https://www.paypalobjects.com 'nonce-${cspNonce}'`,
+    `style-src 'self' https://fonts.googleapis.com https://*.paypal.com https://www.paypalobjects.com 'nonce-${cspNonce}'`,
     "font-src https://fonts.gstatic.com",
     "img-src 'self' data: https://www.paypalobjects.com https://*.paypal.com",
     "connect-src 'self' https://*.paypal.com",
@@ -424,7 +427,11 @@ function adminPageResponse(response: Response): Response {
     "form-action 'self'",
     "object-src 'none'",
   ].join('; '))
-  return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+  const securedResponse = new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+  if (!response.headers.get('content-type')?.includes('text/html') || response.body === null) return securedResponse
+  return new HTMLRewriter()
+    .on('head', { element(element) { element.append(`<meta name="csp-nonce" content="${cspNonce}">`, { html: true }) } })
+    .transform(securedResponse)
 }
 
 async function checkoutTokenMatches(provided: string, expectedHash: string): Promise<boolean> {
