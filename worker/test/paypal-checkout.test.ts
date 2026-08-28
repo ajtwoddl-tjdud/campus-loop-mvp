@@ -18,163 +18,30 @@ async function request(path: string, init?: RequestInit) {
   return response
 }
 
-async function createIntake() {
-  const response = await request('/api/v1/rental-intakes', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: 'Campus Student',
-      email: 'student@example.com',
-      secondaryContact: '@campus.student',
-      agree: true,
-      turnstileToken: 'valid-token',
-    }),
-  })
-  expect(response.status).toBe(201)
-  return response.json<{ id: string; checkoutToken: string }>()
-}
-
-function checkoutBody(intake: { id: string; checkoutToken: string }) {
-  return {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ intakeId: intake.id, checkoutToken: intake.checkoutToken }),
-  }
-}
-
-function completedOrder(intakeId: string, amount = '49.99') {
-  return {
-    id: ORDER_ID,
-    status: 'COMPLETED',
-    purchase_units: [{
-      custom_id: intakeId,
-      payments: {
-        captures: [{
-          id: CAPTURE_ID,
-          status: 'COMPLETED',
-          amount: { currency_code: 'USD', value: amount },
-        }],
-      },
-    }],
-  }
-}
-
-function installCheckoutFetch(getIntakeId: () => string, captureAmount = '49.99') {
-  return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
-    const url = input instanceof Request ? input.url : String(input)
-    if (url.startsWith('https://challenges.cloudflare.com/')) {
-      return Response.json({ success: true, action: 'rental_intake', hostname: 'campusloop.attentionplease.build' })
-    }
-    if (url.startsWith('https://discord.com/api/webhooks/')) {
-      return Response.json({ id: 'discord-message-id' })
-    }
-    if (url.endsWith('/v1/oauth2/token')) {
-      return Response.json({ access_token: 'paypal-access-token' })
-    }
-    if (url.endsWith('/v2/checkout/orders') && init?.method === 'POST') {
-      return Response.json({ id: ORDER_ID, status: 'CREATED' }, { status: 201 })
-    }
-    if (url.endsWith(`/v2/checkout/orders/${ORDER_ID}/capture`)) {
-      return Response.json(completedOrder(getIntakeId(), captureAmount))
-    }
-    throw new Error(`Unexpected outbound request: ${url}`)
-  })
-}
-
 afterEach(() => {
   vi.restoreAllMocks()
 })
 
 describe('PayPal Checkout API', () => {
-  test('creates an exact server-priced order with the intake ID as custom_id, then captures it', async () => {
-    let intakeId = ''
-    const fetchMock = installCheckoutFetch(() => intakeId)
-    const intake = await createIntake()
-    intakeId = intake.id
-
-    const createResponse = await request('/api/v1/paypal/orders', checkoutBody(intake))
-    expect(createResponse.status).toBe(201)
-    expect(await createResponse.json()).toEqual({ orderId: ORDER_ID })
-
-    const createCall = fetchMock.mock.calls.find(([input, init]) =>
-      String(input).endsWith('/v2/checkout/orders') && init?.method === 'POST')
-    const paypalPayload = JSON.parse(String(createCall?.[1]?.body))
-    expect(paypalPayload.purchase_units[0]).toMatchObject({
-      custom_id: intake.id,
-      invoice_id: intake.id,
-      amount: {
-        currency_code: 'USD',
-        value: '49.99',
-        breakdown: { item_total: { currency_code: 'USD', value: '49.99' } },
-      },
-      items: [{
-        name: 'Campus Loop Essential Bedding Set',
-        quantity: '1',
-        category: 'PHYSICAL_GOODS',
-        unit_amount: { currency_code: 'USD', value: '49.99' },
-        image_url: 'https://campusloop.attentionplease.build/assets/campus-loop-checkout.jpg',
-        url: 'https://campusloop.attentionplease.build/',
-      }],
-    })
-    expect(paypalPayload.application_context.shipping_preference).toBe('NO_SHIPPING')
-
-    const captureResponse = await request(`/api/v1/paypal/orders/${ORDER_ID}/capture`, checkoutBody(intake))
-    expect(captureResponse.status).toBe(200)
-    expect(await captureResponse.json()).toEqual({ orderId: ORDER_ID, status: 'COMPLETED' })
-
-    const saved = await env.DB.prepare(`
-      SELECT paypal_order_id, paypal_capture_id, payment_status, paid_at
-      FROM rental_intakes WHERE public_id = ?1
-    `).bind(intake.id).first<{
-      paypal_order_id: string
-      paypal_capture_id: string
-      payment_status: string
-      paid_at: string
-    }>()
-    expect(saved).toMatchObject({
-      paypal_order_id: ORDER_ID,
-      paypal_capture_id: CAPTURE_ID,
-      payment_status: 'completed',
-    })
-    expect(saved?.paid_at).toMatch(/Z$/)
-
-    const discordPatch = fetchMock.mock.calls.find(([input, init]) =>
-      String(input).includes('/messages/discord-message-id') && init?.method === 'PATCH')
-    expect(discordPatch).toBeDefined()
-    expect(String(discordPatch?.[1]?.body)).toContain('✅ PayPal 결제 완료')
-    expect(String(discordPatch?.[1]?.body)).toContain(ORDER_ID)
-  })
-
-  test('rejects an invalid checkout capability before contacting PayPal', async () => {
+  test.each([
+    ['/api/v1/paypal/orders'],
+    [`/api/v1/paypal/orders/${ORDER_ID}/capture`],
+  ])('blocks %s without contacting PayPal', async (path) => {
     const fetchMock = vi.spyOn(globalThis, 'fetch')
-    await env.DB.prepare(`
-      INSERT INTO rental_intakes (
-        public_id, customer_name, customer_email, consent_at, created_at,
-        checkout_token_hash, payment_status
-      ) VALUES ('CLR-123456789ABC', 'Student', 'student@example.com', ?1, ?1, 'not-the-token', 'pending')
-    `).bind(new Date().toISOString()).run()
-
-    const response = await request('/api/v1/paypal/orders', {
+    const response = await request(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ intakeId: 'CLR-123456789ABC', checkoutToken: 'x'.repeat(43) }),
     })
 
-    expect(response.status).toBe(404)
+    expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({
+      error: {
+        code: 'sold_out',
+        message: 'Campus Loop bedding sets are sold out. New sign-ups and PayPal payments are closed.',
+      },
+    })
     expect(fetchMock).not.toHaveBeenCalled()
-  })
-
-  test('fails closed when PayPal returns a completed capture with the wrong amount', async () => {
-    let intakeId = ''
-    installCheckoutFetch(() => intakeId, '1.00')
-    const intake = await createIntake()
-    intakeId = intake.id
-    expect((await request('/api/v1/paypal/orders', checkoutBody(intake))).status).toBe(201)
-
-    const response = await request(`/api/v1/paypal/orders/${ORDER_ID}/capture`, checkoutBody(intake))
-
-    expect(response.status).toBe(502)
-    expect(await env.DB.prepare(`SELECT payment_status FROM rental_intakes WHERE public_id = ?1`).bind(intake.id).first('payment_status')).toBe('created')
   })
 })
 

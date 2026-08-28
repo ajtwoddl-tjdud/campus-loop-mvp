@@ -26,6 +26,7 @@ const PAYPAL_TEST_AMOUNT = '1.00'
 const PAYPAL_CURRENCY = 'USD'
 const PUBLIC_SITE_URL = 'https://campusloop.attentionplease.build/'
 const PAYPAL_PRODUCT_IMAGE_URL = `${PUBLIC_SITE_URL}assets/campus-loop-checkout.jpg`
+const SALES_OPEN = false
 const ADMIN_COOKIE_NAME = '__Host-campusloop_admin'
 const ADMIN_SESSION_SECONDS = 8 * 60 * 60
 const ADMIN_LOGIN_WINDOW_SECONDS = 15 * 60
@@ -34,6 +35,10 @@ const ADMIN_LOGIN_MAX_FAILURES = 5
 const PAYMENT_STATUSES = new Set(['pending', 'created', 'completed'])
 const FULFILLMENT_STATUSES = new Set(['pending', 'ready', 'collected', 'returned', 'cancelled'])
 const REFUND_STATUSES = new Set(['not_due', 'pending', 'completed', 'failed'])
+
+function soldOutResponse(): Response {
+  return errorResponse(409, 'sold_out', 'Campus Loop bedding sets are sold out. New sign-ups and PayPal payments are closed.')
+}
 
 const APPLICATION_KEYS = new Set([
   'isChungAngExchangeStudent',
@@ -1503,15 +1508,18 @@ export default {
     }
     if (url.pathname === RENTAL_INTAKE_PATH) {
       if (request.method !== 'POST') return errorResponse(405, 'method_not_allowed', 'Method not allowed.')
+      if (!SALES_OPEN) return soldOutResponse()
       return createRentalIntake(request, env, ctx, requestId)
     }
     if (url.pathname === PAYPAL_ORDERS_PATH) {
       if (request.method !== 'POST') return errorResponse(405, 'method_not_allowed', 'Method not allowed.')
+      if (!SALES_OPEN) return soldOutResponse()
       return createPayPalOrder(request, env, requestId)
     }
     const captureMatch = url.pathname.match(PAYPAL_CAPTURE_PATH)
     if (captureMatch) {
       if (request.method !== 'POST') return errorResponse(405, 'method_not_allowed', 'Method not allowed.')
+      if (!SALES_OPEN) return soldOutResponse()
       return captureOrder(request, env, ctx, requestId, captureMatch[1])
     }
     if (url.pathname === PAYPAL_WEBHOOK_PATH) {

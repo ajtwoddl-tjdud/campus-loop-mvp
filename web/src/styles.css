@@ -277,6 +277,9 @@ nav a:hover { color: var(--orange); }
 .success-panel .paypal-checkout { width: min(100%, 520px); margin-top: 8px; border-top-color: var(--line); }
 .success-panel .paypal-checkout > p:first-child { color: var(--ink-soft); }
 .success-panel .payment-confirmed { margin-top: 28px; display: inline-flex; align-items: center; gap: 9px; padding: 13px 16px; color: var(--forest); background: var(--sage); font-weight: 800; }
+.sold-out-panel .sold-out-label { color: var(--orange); font-size: 14px; font-weight: 900; letter-spacing: .18em; }
+.sold-out-panel h2 { max-width: 780px; }
+.sold-out-contact { margin-top: 32px; }
 
 .faq-section { background: var(--paper); }
 .faq-list { max-width: 900px; margin: 60px 0 0 auto; border-top: 1px solid var(--line); }

@@ -1,23 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
+import { useEffect, useState } from 'react'
 import {
   ArrowRight, BedDouble, CalendarDays, Check, ChevronDown, Mail,
   MapPin, RotateCcw, ShieldCheck, Sparkles,
 } from 'lucide-react'
 
-import { capturePayPalOrder, createPayPalOrder, createRentalIntake } from './api.js'
 import { copy } from './i18n.js'
 
 const languages = ['en', 'ja', 'zh']
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const TURNSTILE_SITE_KEY = '0x4AAAAAAEUW9W3Ef9cHai7m'
-const TURNSTILE_SCRIPT_ID = 'campus-loop-turnstile-script'
-const EMPTY_FORM = {
-  name: '',
-  email: '',
-  secondaryContact: '',
-  agree: false,
-}
 
 function Logo() {
   return (
@@ -54,55 +43,6 @@ function SectionIntro({ eyebrow, title, body }) {
   )
 }
 
-function PayPalCheckout({ t, intake, onCompleted }) {
-  const [error, setError] = useState('')
-  const [processing, setProcessing] = useState(false)
-  const options = useMemo(() => ({
-    clientId: intake.paypal.clientId,
-    currency: 'USD',
-    intent: 'capture',
-    components: 'buttons',
-    disableFunding: 'venmo',
-  }), [intake.paypal.clientId])
-
-  return (
-    <div className="paypal-checkout">
-      <p>{t.paymentMethods}</p>
-      <PayPalScriptProvider options={options}>
-        <div aria-label={t.paymentLabel}>
-          <PayPalButtons
-            disabled={processing}
-            forceReRender={[intake.id]}
-            style={{ layout: 'vertical', shape: 'rect', height: 45, label: 'paypal' }}
-            createOrder={async () => {
-              setError('')
-              const result = await createPayPalOrder(intake)
-              return result.orderId
-            }}
-            onApprove={async (data) => {
-              setProcessing(true)
-              setError('')
-              try {
-                const result = await capturePayPalOrder(intake, data.orderID)
-                if (result.status !== 'COMPLETED') throw new Error('Payment was not completed')
-                onCompleted()
-              } catch {
-                setError(t.paymentError)
-              } finally {
-                setProcessing(false)
-              }
-            }}
-            onCancel={() => setError(t.paymentCancelled)}
-            onError={() => setError(t.paymentError)}
-          />
-        </div>
-      </PayPalScriptProvider>
-      {processing ? <p className="paypal-processing" role="status">{t.paymentProcessing}</p> : null}
-      {error ? <p className="paypal-error" role="alert">{error}</p> : null}
-    </div>
-  )
-}
-
 function Hero({ t }) {
   return (
     <section className="pilot-hero">
@@ -115,7 +55,7 @@ function Hero({ t }) {
         <h1>{t.hero}</h1>
         <p className="hero-body">{t.heroBody}</p>
         <div className="hero-actions">
-          <a className="button button-primary" href="#checkout">{t.apply}<ArrowRight size={18} /></a>
+          <a className="button button-primary" href="#sold-out">{t.soldOutCta}<ArrowRight size={18} /></a>
           <a className="text-link" href="#included">{t.seeIncluded}</a>
         </div>
         <p className="hero-note"><ShieldCheck size={17} />{t.heroNote}</p>
@@ -203,162 +143,17 @@ function HowItWorks({ t }) {
   )
 }
 
-function TurnstileWidget({ onToken, onError, resetHandle, t }) {
-  const containerRef = useRef(null)
-
-  useEffect(() => {
-    let widgetId
-    let active = true
-
-    const renderWidget = () => {
-      if (!active || !containerRef.current || !window.turnstile) return
-      widgetId = window.turnstile.render(containerRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        action: 'rental_intake',
-        appearance: 'interaction-only',
-        execution: 'render',
-        size: 'flexible',
-        theme: 'auto',
-        callback: (token) => {
-          onToken(token)
-          onError('')
-        },
-        'expired-callback': () => {
-          onToken('')
-          onError(t.turnstileRequired)
-        },
-        'error-callback': () => {
-          onToken('')
-          onError(t.turnstileError)
-        },
-      })
-      resetHandle.current = () => {
-        window.turnstile?.reset(widgetId)
-        onToken('')
-      }
-    }
-
-    if (window.turnstile) {
-      renderWidget()
-    } else {
-      let script = document.getElementById(TURNSTILE_SCRIPT_ID)
-      if (!script) {
-        script = document.createElement('script')
-        script.id = TURNSTILE_SCRIPT_ID
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-        script.async = true
-        script.defer = true
-        document.head.appendChild(script)
-      }
-      script.addEventListener('load', renderWidget, { once: true })
-    }
-
-    return () => {
-      active = false
-      resetHandle.current = null
-      if (widgetId !== undefined) window.turnstile?.remove(widgetId)
-    }
-  }, [onError, onToken, resetHandle, t.turnstileError, t.turnstileRequired])
-
+function SoldOut({ t }) {
   return (
-    <div className="turnstile-field">
-      <span>{t.securityCheck}</span>
-      <div ref={containerRef} aria-label={t.securityCheck} />
-    </div>
-  )
-}
-
-function RentalIntakeForm({ t }) {
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [intake, setIntake] = useState(null)
-  const [paymentCompleted, setPaymentCompleted] = useState(false)
-  const [turnstileToken, setTurnstileToken] = useState('')
-  const turnstileReset = useRef(null)
-
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
-
-  const validate = () => {
-    if (!form.name.trim() || !form.email.trim() || !form.agree) {
-      return t.formError
-    }
-    if (!EMAIL_PATTERN.test(form.email)) return t.emailError
-    if (!turnstileToken) return t.turnstileRequired
-    return ''
-  }
-
-  const submit = async (event) => {
-    event.preventDefault()
-    const validationError = validate()
-    if (validationError) {
-      setError(validationError)
-      return
-    }
-
-    setError('')
-    setSubmitting(true)
-    try {
-      const response = await createRentalIntake({
-        name: form.name.trim(),
-        email: form.email.trim(),
-        secondaryContact: form.secondaryContact.trim(),
-        agree: form.agree,
-        turnstileToken,
-      })
-      setIntake(response)
-      window.dispatchEvent(new CustomEvent('campus-loop:event', {
-        detail: { name: 'rental_intake_submitted' },
-      }))
-    } catch {
-      setError(t.submitError)
-      turnstileReset.current?.()
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <section className="apply-section" id="checkout">
-      {intake ? (
-        <div className="success-panel" role="status">
-          <span className="success-mark"><Check size={28} /></span>
-          <h2>{paymentCompleted ? t.paymentSuccessTitle : t.successTitle}</h2>
-          <p>{paymentCompleted ? t.paymentSuccessBody : t.successBody}</p>
-          {paymentCompleted ? (
-            <p className="payment-confirmed"><Check size={18} />{t.paymentConfirmed}</p>
-          ) : (
-            <>
-              <p className="checkout-price">{t.checkoutPrice}</p>
-              <PayPalCheckout t={t} intake={intake} onCompleted={() => setPaymentCompleted(true)} />
-            </>
-          )}
-        </div>
-      ) : (
-        <form className="application-form" onSubmit={submit} noValidate>
-          <div className="field-grid">
-            <label>{t.name}<input type="text" autoComplete="name" value={form.name} onChange={(event) => update('name', event.target.value)} /></label>
-            <label>{t.email}<input type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
-            <label className="field-wide">{t.secondaryContact}<input type="text" autoComplete="off" placeholder={t.secondaryPlaceholder} value={form.secondaryContact} onChange={(event) => update('secondaryContact', event.target.value)} /></label>
-          </div>
-
-          <label className="check-row consent-row">
-            <input type="checkbox" checked={form.agree} onChange={(event) => update('agree', event.target.checked)} />
-            <span>{t.consent}</span>
-          </label>
-          <TurnstileWidget
-            onToken={setTurnstileToken}
-            onError={setError}
-            resetHandle={turnstileReset}
-            t={t}
-          />
-          <p className="non-confirmation"><ShieldCheck size={16} />{t.noChargeYet}</p>
-          {error ? <p className="form-error" role="alert">{error}</p> : null}
-          <button className="button button-primary submit-button" type="submit" disabled={submitting}>
-            {submitting ? t.submitting : t.submit}<ArrowRight size={18} />
-          </button>
-        </form>
-      )}
+    <section className="apply-section" id="sold-out">
+      <div className="success-panel sold-out-panel" role="status">
+        <p className="sold-out-label">{t.soldOutLabel}</p>
+        <h2>{t.soldOutTitle}</h2>
+        <p>{t.soldOutBody}</p>
+        <a className="button button-primary sold-out-contact" href="mailto:nvpz1598@gmail.com">
+          {t.soldOutContact}<Mail size={18} />
+        </a>
+      </div>
     </section>
   )
 }
@@ -415,7 +210,7 @@ function App() {
         <Included t={t} />
         <Research t={t} />
         <HowItWorks t={t} />
-        <RentalIntakeForm t={t} />
+        <SoldOut t={t} />
         <Faq t={t} />
         <Contact t={t} />
       </main>
